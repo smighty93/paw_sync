@@ -321,24 +321,10 @@ export default function VetDashboardLayout({ children }) {
                     {/* ADMIN */}
 
                     <button
-                      type="button"
                       onClick={() =>
-                        switchDashboard("/admin")
+                        switchDashboard("/dashboard")
                       }
-                      className="
-                        w-full
-                        flex
-                        items-center
-                        gap-3
-                        px-3
-                        py-3
-                        rounded-md
-                        text-sm
-                        text-slate-700
-                        hover:bg-white
-                        hover:text-blue-600
-                        transition-colors
-                      "
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm text-slate-700 hover:bg-white"
                     >
 
                       <span className="text-base">
