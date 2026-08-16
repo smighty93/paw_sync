@@ -1,356 +1,468 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   PawPrint,
   CalendarDays,
   Syringe,
   HeartPulse,
-  FileText,
   Plus,
+  FileText,
   ChevronRight,
-  Clock,
+  User,
+  ChevronDown,
+  LayoutDashboard,
+  Stethoscope,
+  LogOut,
 } from "lucide-react";
+
+import MyPets from "../../components/dashboard/MyPets";
+import UpcomingAppointments from "../../components/dashboard/UpcomingAppointments.jsx";
+import VaccinationReminder from "../../components/dashboard/VaccinationReminder";
+import RecentActivity from "../../components/dashboard/RecentActivity";
 
 function OwnerMobileDashboard() {
   const navigate = useNavigate();
 
+  const [showProfile, setShowProfile] = useState(false);
+  const [showDashboards, setShowDashboards] = useState(false);
+
+  const switchDashboard = (path) => {
+    setShowProfile(false);
+    setShowDashboards(false);
+    navigate(path);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+      <div className="w-full max-w-md mx-auto px-4 py-5 pb-10">
 
-      {/* ================= HEADER ================= */}
-      <header className="bg-white px-5 py-4 border-b border-slate-100 sticky top-0 z-30">
-        <div className="flex items-center justify-between">
-
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🐾</span>
-            <span className="text-xl font-bold text-blue-600">
-              PawSync
-            </span>
-          </div>
-
-          <button
-            onClick={() => navigate("/profile")}
-            className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center"
-          >
-            <span className="text-xl">👤</span>
-          </button>
-
-        </div>
-      </header>
-
-
-      {/* ================= CONTENT ================= */}
-      <main className="px-5 py-6 space-y-7">
-
-        {/* ================= WELCOME ================= */}
-        <section className="bg-gradient-to-br from-blue-600 to-blue-500 rounded-3xl p-6 text-white shadow-lg">
-
-          <p className="text-blue-100 text-sm mb-2">
+        {/* ================= HEADER ================= */}
+        <div className="mb-5">
+          <p className="text-sm font-medium text-slate-500">
             Welcome back 👋
           </p>
 
-          <h1 className="text-3xl font-bold leading-tight">
-            Good Evening!
+          <h1 className="text-2xl font-bold text-slate-900 mt-1">
+            Pet Owner Dashboard
           </h1>
+        </div>
+        {/* PROFILE BUTTON */}
+        <div className="relative">
 
-          <p className="text-blue-100 mt-3 leading-relaxed">
-            Manage your pets, appointments and
-            medical records from one place.
+      <button
+        type="button"
+        onClick={() => {
+          setShowProfile(!showProfile);
+          setShowDashboards(false);
+        }}
+        className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center"
+      >
+        <User className="w-5 h-5 text-blue-600" />
+      </button>
+
+      {/* PROFILE MENU */}
+      {showProfile && (
+        <div className="absolute right-0 top-14 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 z-[100] overflow-hidden">
+
+          {/* USER INFO */}
+          <div className="px-4 py-4 border-b border-slate-100">
+            <p className="font-semibold text-slate-800">
+              Pet Owner
+            </p>
+
+            <p className="text-xs text-slate-500 mt-1">
+              PawSync Member
+            </p>
+          </div>
+
+          {/* SWITCH DASHBOARD */}
+          <button
+            type="button"
+            onClick={() =>
+              setShowDashboards(!showDashboards)
+            }
+            className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+          >
+            <span className="flex items-center gap-3">
+              <LayoutDashboard className="w-4 h-4" />
+              Switch Dashboard
+            </span>
+
+            <ChevronDown
+              className={`w-4 h-4 transition-transform ${
+                showDashboards ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {/* DASHBOARD OPTIONS */}
+          {showDashboards && (
+            <div className="mx-3 mb-2 rounded-xl bg-slate-50 p-1">
+
+              {/* ADMIN */}
+              <button
+                type="button"
+                onClick={() =>
+                  switchDashboard("/admin")
+                  }
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-slate-700 hover:bg-white"
+              >
+                <span>👑</span>
+                <span>Admin Dashboard</span>
+              </button>
+
+              {/* VETERINARIAN */}
+              <button
+                type="button"
+                onClick={() =>
+                  switchDashboard("/veterinarian")
+                }
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-slate-700 hover:bg-white"
+              >
+                <Stethoscope className="w-4 h-4 text-blue-600" />
+                <span>Veterinarian Dashboard</span>
+              </button>
+              {/* PET OWNER */}
+              <button
+                type="button"
+                onClick={() =>
+                  switchDashboard("/dashboard")
+                }
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-slate-700 hover:bg-white"
+              >
+                <span>🐾</span>
+                <span>Pet Owner Dashboard</span>
+              </button>
+
+            </div>
+          )}
+
+          {/* PROFILE */}
+          <button
+            type="button"
+            onClick={() => navigate("/profile")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+          >
+            <User className="w-4 h-4" />
+            Profile
+          </button>
+
+          {/* LOGOUT */}
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+            </button>
+
+        </div>
+         )}
+
+        {/* ================= WELCOME BANNER ================= */}
+        <section className="bg-gradient-to-br from-blue-600 to-blue-500 rounded-3xl p-6 text-white shadow-lg mb-6">
+
+          <p className="text-blue-100 text-sm font-medium">
+            PawSync Pet Care
           </p>
 
+          <h2 className="text-3xl font-bold leading-tight mt-2">
+            Good Evening 👋
+          </h2>
+
+          <p className="text-blue-100 text-sm leading-6 mt-3 max-w-xs">
+            Manage your pets, appointments and medical records
+            from one place.
+          </p>
+
+          {/* Banner Actions */}
           <div className="grid grid-cols-2 gap-3 mt-6">
 
             <button
+              type="button"
               onClick={() => navigate("/pets")}
-              className="bg-white text-blue-600 rounded-2xl py-4 px-3 font-semibold flex flex-col items-center justify-center gap-1 shadow-sm"
+              className="bg-white text-blue-600 rounded-xl py-3 px-3 font-semibold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition"
             >
-              <Plus className="w-6 h-6" />
-              <span>Add Pet</span>
+              <Plus className="w-4 h-4" />
+              Add Pet
             </button>
 
             <button
+              type="button"
               onClick={() => navigate("/appointments")}
-              className="bg-blue-700 text-white rounded-2xl py-4 px-3 font-semibold flex flex-col items-center justify-center gap-1"
+              className="bg-blue-700 text-white rounded-xl py-3 px-3 font-semibold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition"
             >
-              <CalendarDays className="w-6 h-6" />
-              <span>Book Appointment</span>
+              <CalendarDays className="w-4 h-4" />
+              Book Appointment
             </button>
 
           </div>
         </section>
 
-
         {/* ================= STATISTICS ================= */}
-        <section>
+        <section className="mb-7">
 
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">
-            Overview
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-slate-900">
+              Overview
+            </h2>
+          </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
 
-            <StatCard
-              icon={<PawPrint />}
-              label="My Pets"
-              value="3"
-            />
+            {/* My Pets */}
+            <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
 
-            <StatCard
-              icon={<CalendarDays />}
-              label="Appointments"
-              value="2"
-            />
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
+                <PawPrint className="w-5 h-5 text-blue-600" />
+              </div>
 
-            <StatCard
-              icon={<Syringe />}
-              label="Vaccinations Due"
-              value="1"
-            />
+              <p className="text-sm text-slate-500">
+                My Pets
+              </p>
 
-            <StatCard
-              icon={<HeartPulse />}
-              label="Health Status"
-              value="Good"
-            />
+              <p className="text-2xl font-bold text-slate-900 mt-1">
+                3
+              </p>
+
+            </div>
+
+            {/* Appointments */}
+            <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-3">
+                <CalendarDays className="w-5 h-5 text-indigo-600" />
+              </div>
+
+              <p className="text-sm text-slate-500">
+                Appointments
+              </p>
+
+              <p className="text-2xl font-bold text-slate-900 mt-1">
+                2
+              </p>
+
+            </div>
+
+            {/* Vaccinations */}
+            <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mb-3">
+                <Syringe className="w-5 h-5 text-amber-600" />
+              </div>
+
+              <p className="text-sm text-slate-500">
+                Vaccinations Due
+              </p>
+
+              <p className="text-2xl font-bold text-slate-900 mt-1">
+                1
+              </p>
+
+            </div>
+
+            {/* Health */}
+            <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mb-3">
+                <HeartPulse className="w-5 h-5 text-emerald-600" />
+              </div>
+
+              <p className="text-sm text-slate-500">
+                Health Status
+              </p>
+
+              <p className="text-2xl font-bold text-emerald-600 mt-1">
+                Good
+              </p>
+
+            </div>
 
           </div>
         </section>
 
-
         {/* ================= QUICK ACTIONS ================= */}
-        <section>
+        <section className="mb-7">
 
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">
+          <h2 className="text-xl font-bold text-slate-900 mb-4">
             Quick Actions
           </h2>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="space-y-3">
 
-            <ActionCard
-              icon={<PawPrint />}
-              title="Add Pet"
+            {/* Add Pet */}
+            <button
+              type="button"
               onClick={() => navigate("/pets")}
-            />
+              className="w-full bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between active:bg-slate-50 transition"
+            >
 
-            <ActionCard
-              icon={<CalendarDays />}
-              title="Book"
-              subtitle="Appointment"
+              <div className="flex items-center gap-4">
+
+                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <PawPrint className="w-6 h-6 text-blue-600" />
+                </div>
+
+                <div className="text-left">
+                  <p className="font-semibold text-slate-900">
+                    Add Pet
+                  </p>
+
+                  <p className="text-xs text-slate-500 mt-1">
+                    Register a new pet
+                  </p>
+                </div>
+
+              </div>
+
+              <ChevronRight className="w-5 h-5 text-slate-400" />
+
+            </button>
+
+            {/* Appointment */}
+            <button
+              type="button"
               onClick={() => navigate("/appointments")}
-            />
+              className="w-full bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between active:bg-slate-50 transition"
+            >
 
-            <ActionCard
-              icon={<FileText />}
-              title="Medical"
-              subtitle="Records"
+              <div className="flex items-center gap-4">
+
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center">
+                  <CalendarDays className="w-6 h-6 text-indigo-600" />
+                </div>
+
+                <div className="text-left">
+                  <p className="font-semibold text-slate-900">
+                    Book Appointment
+                  </p>
+
+                  <p className="text-xs text-slate-500 mt-1">
+                    Schedule a vet visit
+                  </p>
+                </div>
+
+              </div>
+
+              <ChevronRight className="w-5 h-5 text-slate-400" />
+
+            </button>
+
+            {/* Medical Record */}
+            <button
+              type="button"
               onClick={() => navigate("/medical-records")}
-            />
+              className="w-full bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between active:bg-slate-50 transition"
+            >
+
+              <div className="flex items-center gap-4">
+
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-emerald-600" />
+                </div>
+
+                <div className="text-left">
+                  <p className="font-semibold text-slate-900">
+                    Medical Records
+                  </p>
+
+                  <p className="text-xs text-slate-500 mt-1">
+                    View your pet's records
+                  </p>
+                </div>
+
+              </div>
+
+              <ChevronRight className="w-5 h-5 text-slate-400" />
+
+            </button>
 
           </div>
         </section>
 
-
         {/* ================= MY PETS ================= */}
-        <section>
+        <section className="mb-7">
 
           <div className="flex items-center justify-between mb-4">
 
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-slate-900">
               My Pets
             </h2>
 
             <button
+              type="button"
               onClick={() => navigate("/pets")}
-              className="text-blue-600 font-semibold flex items-center gap-1"
+              className="text-sm font-semibold text-blue-600"
             >
               View All
-              <ChevronRight className="w-4 h-4" />
             </button>
 
           </div>
 
-
-          {/* PET CARD */}
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
-
-            <img
-              src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=900&q=80"
-              alt="Bruno"
-              className="w-full h-52 object-cover"
-            />
-
-            <div className="p-5">
-
-              <div className="flex items-start justify-between">
-
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">
-                    Bruno
-                  </h3>
-
-                  <p className="text-slate-500 mt-1">
-                    Golden Retriever
-                  </p>
-
-                  <p className="text-sm text-slate-400 mt-1">
-                    3 Years
-                  </p>
-                </div>
-
-                <span className="text-green-500 text-2xl">
-                  ♥
-                </span>
-
-              </div>
-
-              <button
-                onClick={() => navigate("/pets")}
-                className="mt-5 text-blue-600 font-semibold flex items-center gap-1"
-              >
-                View Details
-                <ChevronRight className="w-4 h-4" />
-              </button>
-
-            </div>
+          <div className="overflow-hidden rounded-2xl">
+            <MyPets />
           </div>
 
         </section>
 
+        {/* ================= UPCOMING APPOINTMENTS ================= */}
+        <section className="mb-7">
 
-        {/* ================= UPCOMING APPOINTMENT ================= */}
-        <section>
+          <div className="flex items-center justify-between mb-4">
 
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">
-            Upcoming Appointment
-          </h2>
+            <h2 className="text-xl font-bold text-slate-900">
+              Upcoming Appointments
+            </h2>
 
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-
-            <div className="flex items-center gap-4">
-
-              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                <CalendarDays className="text-blue-600" />
-              </div>
-
-              <div className="flex-1">
-
-                <h3 className="font-semibold text-slate-900">
-                  Veterinary Checkup
-                </h3>
-
-                <p className="text-sm text-slate-500">
-                  Dr. Sarah Johnson
-                </p>
-
-              </div>
-
-              <ChevronRight className="text-slate-400" />
-
-            </div>
-
-            <div className="flex items-center gap-2 mt-4 text-sm text-slate-500">
-              <Clock className="w-4 h-4" />
-              18 Aug 2026 • 10:30 AM
-            </div>
+            <CalendarDays className="w-5 h-5 text-blue-600" />
 
           </div>
 
-        </section>
+          <div className="overflow-hidden rounded-2xl">
+            <UpcomingAppointments />
+          </div>
 
+        </section>
 
         {/* ================= VACCINATION ================= */}
-        <section>
+        <section className="mb-7">
 
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">
-            Vaccination Reminder
-          </h2>
+          <div className="flex items-center justify-between mb-4">
 
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <h2 className="text-xl font-bold text-slate-900">
+              Vaccination Reminder
+            </h2>
 
-            <div className="flex items-center gap-4">
+            <Syringe className="w-5 h-5 text-amber-500" />
 
-              <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center">
-                <Syringe className="text-orange-500" />
-              </div>
+          </div>
 
-              <div>
-
-                <h3 className="font-semibold text-slate-900">
-                  Rabies Vaccine
-                </h3>
-
-                <p className="text-sm text-slate-500">
-                  Bruno • Due 20 Aug 2026
-                </p>
-
-              </div>
-
-            </div>
-
+          <div className="overflow-hidden rounded-2xl">
+            <VaccinationReminder />
           </div>
 
         </section>
 
-      </main>
+        {/* ================= RECENT ACTIVITY ================= */}
+        <section>
 
-    </div>
-  );
-}
+          <div className="flex items-center justify-between mb-4">
 
+            <h2 className="text-xl font-bold text-slate-900">
+              Recent Activity
+            </h2>
 
-/* ================= STAT CARD ================= */
+          </div>
 
-function StatCard({ icon, label, value }) {
-  return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+          <div className="overflow-hidden rounded-2xl">
+            <RecentActivity />
+          </div>
 
-      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-        {React.cloneElement(icon, {
-          className: "w-5 h-5",
-        })}
-      </div>
-
-      <p className="text-sm text-slate-500">
-        {label}
-      </p>
-
-      <p className="text-2xl font-bold text-slate-900 mt-1">
-        {value}
-      </p>
-
-    </div>
-  );
-}
-
-
-/* ================= ACTION CARD ================= */
-
-function ActionCard({ icon, title, subtitle, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 text-left active:scale-95 transition"
-    >
-
-      <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-
-        {React.cloneElement(icon, {
-          className: "w-5 h-5",
-        })}
+        </section>
 
       </div>
-
-      <p className="font-semibold text-slate-800 text-sm">
-        {title}
-      </p>
-
-      {subtitle && (
-        <p className="font-semibold text-slate-800 text-sm">
-          {subtitle}
-        </p>
-      )}
-
-    </button>
+    </div>
   );
 }
 
