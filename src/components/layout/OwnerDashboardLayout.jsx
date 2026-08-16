@@ -46,119 +46,123 @@ function OwnerMobileDashboard() {
             Pet Owner Dashboard
           </h1>
         </div>
+
         {/* PROFILE BUTTON */}
         <div className="relative">
 
-      <button
-        type="button"
-        onClick={() => {
-          setShowProfile(!showProfile);
-          setShowDashboards(false);
-        }}
-        className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center"
-      >
-        <User className="w-5 h-5 text-blue-600" />
-      </button>
-
-      {/* PROFILE MENU */}
-      {showProfile && (
-        <div className="absolute right-0 top-14 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 z-[100] overflow-hidden">
-
-          {/* USER INFO */}
-          <div className="px-4 py-4 border-b border-slate-100">
-            <p className="font-semibold text-slate-800">
-              Pet Owner
-            </p>
-
-            <p className="text-xs text-slate-500 mt-1">
-              PawSync Member
-            </p>
-          </div>
-
-          {/* SWITCH DASHBOARD */}
           <button
             type="button"
-            onClick={() =>
-              setShowDashboards(!showDashboards)
-            }
-            className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+            onClick={() => {
+              setShowProfile(!showProfile);
+              setShowDashboards(false);
+            }}
+            className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center"
           >
-            <span className="flex items-center gap-3">
-              <LayoutDashboard className="w-4 h-4" />
-              Switch Dashboard
-            </span>
-
-            <ChevronDown
-              className={`w-4 h-4 transition-transform ${
-                showDashboards ? "rotate-180" : ""
-              }`}
-            />
+            <User className="w-5 h-5 text-blue-600" />
           </button>
 
-          {/* DASHBOARD OPTIONS */}
-          {showDashboards && (
-            <div className="mx-3 mb-2 rounded-xl bg-slate-50 p-1">
+          {/* PROFILE MENU */}
+          {showProfile && (
+            <div className="absolute right-0 top-14 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200 z-[100] overflow-hidden">
 
-              {/* ADMIN */}
+              {/* USER INFO */}
+              <div className="px-4 py-4 border-b border-slate-100">
+                <p className="font-semibold text-slate-800">
+                  Pet Owner
+                </p>
+
+                <p className="text-xs text-slate-500 mt-1">
+                  PawSync Member
+                </p>
+              </div>
+
+              {/* SWITCH DASHBOARD */}
               <button
                 type="button"
                 onClick={() =>
-                  switchDashboard("/admin")
-                  }
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-slate-700 hover:bg-white"
+                  setShowDashboards(!showDashboards)
+                }
+                className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
               >
-                <span>👑</span>
-                <span>Admin Dashboard</span>
+                <span className="flex items-center gap-3">
+                  <LayoutDashboard className="w-4 h-4" />
+                  Switch Dashboard
+                </span>
+
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${
+                    showDashboards ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
-              {/* VETERINARIAN */}
+              {/* DASHBOARD OPTIONS */}
+              {showDashboards && (
+                <div className="mx-3 mb-2 rounded-xl bg-slate-50 p-1">
+
+                  {/* ADMIN */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      switchDashboard("/admin")
+                    }
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-slate-700 hover:bg-white"
+                  >
+                    <span>👑</span>
+                    <span>Admin Dashboard</span>
+                  </button>
+
+                  {/* VETERINARIAN */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      switchDashboard("/veterinarian")
+                    }
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-slate-700 hover:bg-white"
+                  >
+                    <Stethoscope className="w-4 h-4 text-blue-600" />
+                    <span>Veterinarian Dashboard</span>
+                  </button>
+
+                  {/* PET OWNER */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      switchDashboard("/dashboard")
+                    }
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-slate-700 hover:bg-white"
+                  >
+                    <span>🐾</span>
+                    <span>Pet Owner Dashboard</span>
+                  </button>
+
+                </div>
+              )}
+
+              {/* PROFILE */}
               <button
                 type="button"
-                onClick={() =>
-                  switchDashboard("/veterinarian")
-                }
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-slate-700 hover:bg-white"
+                onClick={() => navigate("/profile")}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
               >
-                <Stethoscope className="w-4 h-4 text-blue-600" />
-                <span>Veterinarian Dashboard</span>
+                <User className="w-4 h-4" />
+                Profile
               </button>
-              {/* PET OWNER */}
+
+              {/* LOGOUT */}
               <button
                 type="button"
-                onClick={() =>
-                  switchDashboard("/dashboard")
-                }
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-slate-700 hover:bg-white"
+                onClick={() => navigate("/")}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"
               >
-                <span>🐾</span>
-                <span>Pet Owner Dashboard</span>
+                <LogOut className="w-4 h-4" />
+                Logout
               </button>
 
             </div>
           )}
 
-          {/* PROFILE */}
-          <button
-            type="button"
-            onClick={() => navigate("/profile")}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
-          >
-            <User className="w-4 h-4" />
-            Profile
-          </button>
-
-          {/* LOGOUT */}
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"
-          >
-            <LogOut className="w-4 h-4" />
-            Logout
-            </button>
-
         </div>
-         )}
 
         {/* ================= WELCOME BANNER ================= */}
         <section className="bg-gradient-to-br from-blue-600 to-blue-500 rounded-3xl p-6 text-white shadow-lg mb-6">
@@ -213,7 +217,6 @@ function OwnerMobileDashboard() {
 
             {/* My Pets */}
             <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-
               <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
                 <PawPrint className="w-5 h-5 text-blue-600" />
               </div>
@@ -225,12 +228,10 @@ function OwnerMobileDashboard() {
               <p className="text-2xl font-bold text-slate-900 mt-1">
                 3
               </p>
-
             </div>
 
             {/* Appointments */}
             <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-
               <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-3">
                 <CalendarDays className="w-5 h-5 text-indigo-600" />
               </div>
@@ -242,12 +243,10 @@ function OwnerMobileDashboard() {
               <p className="text-2xl font-bold text-slate-900 mt-1">
                 2
               </p>
-
             </div>
 
             {/* Vaccinations */}
             <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-
               <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mb-3">
                 <Syringe className="w-5 h-5 text-amber-600" />
               </div>
@@ -259,12 +258,10 @@ function OwnerMobileDashboard() {
               <p className="text-2xl font-bold text-slate-900 mt-1">
                 1
               </p>
-
             </div>
 
             {/* Health */}
             <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
-
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mb-3">
                 <HeartPulse className="w-5 h-5 text-emerald-600" />
               </div>
@@ -276,7 +273,6 @@ function OwnerMobileDashboard() {
               <p className="text-2xl font-bold text-emerald-600 mt-1">
                 Good
               </p>
-
             </div>
 
           </div>
@@ -297,7 +293,6 @@ function OwnerMobileDashboard() {
               onClick={() => navigate("/pets")}
               className="w-full bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between active:bg-slate-50 transition"
             >
-
               <div className="flex items-center gap-4">
 
                 <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
@@ -317,7 +312,6 @@ function OwnerMobileDashboard() {
               </div>
 
               <ChevronRight className="w-5 h-5 text-slate-400" />
-
             </button>
 
             {/* Appointment */}
@@ -326,7 +320,6 @@ function OwnerMobileDashboard() {
               onClick={() => navigate("/appointments")}
               className="w-full bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between active:bg-slate-50 transition"
             >
-
               <div className="flex items-center gap-4">
 
                 <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center">
@@ -346,7 +339,6 @@ function OwnerMobileDashboard() {
               </div>
 
               <ChevronRight className="w-5 h-5 text-slate-400" />
-
             </button>
 
             {/* Medical Record */}
@@ -355,7 +347,6 @@ function OwnerMobileDashboard() {
               onClick={() => navigate("/medical-records")}
               className="w-full bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between active:bg-slate-50 transition"
             >
-
               <div className="flex items-center gap-4">
 
                 <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
@@ -375,7 +366,6 @@ function OwnerMobileDashboard() {
               </div>
 
               <ChevronRight className="w-5 h-5 text-slate-400" />
-
             </button>
 
           </div>
@@ -385,7 +375,6 @@ function OwnerMobileDashboard() {
         <section className="mb-7">
 
           <div className="flex items-center justify-between mb-4">
-
             <h2 className="text-xl font-bold text-slate-900">
               My Pets
             </h2>
@@ -397,7 +386,6 @@ function OwnerMobileDashboard() {
             >
               View All
             </button>
-
           </div>
 
           <div className="overflow-hidden rounded-2xl">
@@ -410,13 +398,11 @@ function OwnerMobileDashboard() {
         <section className="mb-7">
 
           <div className="flex items-center justify-between mb-4">
-
             <h2 className="text-xl font-bold text-slate-900">
               Upcoming Appointments
             </h2>
 
             <CalendarDays className="w-5 h-5 text-blue-600" />
-
           </div>
 
           <div className="overflow-hidden rounded-2xl">
@@ -429,13 +415,11 @@ function OwnerMobileDashboard() {
         <section className="mb-7">
 
           <div className="flex items-center justify-between mb-4">
-
             <h2 className="text-xl font-bold text-slate-900">
               Vaccination Reminder
             </h2>
 
             <Syringe className="w-5 h-5 text-amber-500" />
-
           </div>
 
           <div className="overflow-hidden rounded-2xl">
@@ -448,11 +432,9 @@ function OwnerMobileDashboard() {
         <section>
 
           <div className="flex items-center justify-between mb-4">
-
             <h2 className="text-xl font-bold text-slate-900">
               Recent Activity
             </h2>
-
           </div>
 
           <div className="overflow-hidden rounded-2xl">
