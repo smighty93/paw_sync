@@ -154,6 +154,35 @@ function OwnerMobileDashboard() {
 
           </div>
         </section>
+        {/* ADMIN */}
+<button
+  type="button"
+  onClick={() => switchDashboard("/admin")}
+  className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm text-slate-700 hover:bg-white hover:text-blue-600"
+>
+  👑
+  <span>Admin Dashboard</span>
+</button>
+
+{/* VETERINARIAN */}
+<button
+  type="button"
+  onClick={() => switchDashboard("/veterinarian")}
+  className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm text-slate-700 hover:bg-white hover:text-blue-600"
+>
+  <Stethoscope className="w-4 h-4 text-blue-600" />
+  <span>Veterinarian Dashboard</span>
+</button>
+
+{/* PET OWNER */}
+<button
+  type="button"
+  onClick={() => switchDashboard("/dashboard")}
+  className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm text-slate-700 hover:bg-white hover:text-blue-600"
+>
+  🐾
+  <span>Pet Owner Dashboard</span>
+</button>
 
         {/* ================= QUICK ACTIONS ================= */}
         <section className="mb-7">
