@@ -1,4 +1,5 @@
 import React from "react";
+import OwnerDashboardLayout from "../../components/layout/OwnerDashboardLayout";
 import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
 import StatsGrid from "../../components/dashboard/StatsGrid";
 import QuickActions from "../../components/dashboard/QuickActions";
@@ -9,7 +10,7 @@ import RecentActivity from "../../components/dashboard/RecentActivity";
 
 function OwnerMobileDashboard() {
   return (
-    <div className="min-h-screen bg-slate-50 p-4">
+    <OwnerDashboardLayout>
       <div className="space-y-6">
 
         {/* Welcome */}
@@ -34,7 +35,7 @@ function OwnerMobileDashboard() {
         <RecentActivity />
 
       </div>
-    </div>
+    </OwnerDashboardLayout>
   );
 }
 
