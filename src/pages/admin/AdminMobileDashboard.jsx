@@ -265,55 +265,125 @@ function AdminMobileDashboard() {
           </div>
         </div>
 
-        {/* Quick Navigation */}
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm">
+        {/* Quick Management */}
+<div className="space-y-4">
+  <div>
+    <h2 className="text-lg font-bold text-slate-900">
+      Quick Management
+    </h2>
+    <p className="text-sm text-slate-500 mt-1">
+      Quickly access and manage PawSync resources.
+    </p>
+  </div>
 
-          <div className="px-4 py-4 border-b border-slate-100">
-            <h2 className="font-semibold text-slate-800">
-              Quick Management
-            </h2>
-          </div>
+  <div className="grid grid-cols-2 gap-3">
 
-          <div className="divide-y divide-slate-100">
+    <button
+      onClick={() => navigate("/admin/users")}
+      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
+    >
+      <div className="text-2xl mb-2">👥</div>
+      <h3 className="font-semibold text-slate-800 text-sm">
+        Manage Users
+      </h3>
+      <p className="text-xs text-slate-500 mt-1">
+        View pet owners
+      </p>
+    </button>
 
-            <button
-              onClick={() => navigate("/admin/users")}
-              className="w-full px-4 py-4 flex items-center justify-between text-left"
-            >
-              <span className="flex items-center gap-3 text-sm text-slate-700">
-                <Users className="w-5 h-5 text-blue-600" />
-                Manage Users
-              </span>
+    <button
+      onClick={() => navigate("/admin/veterinarians")}
+      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
+    >
+      <div className="text-2xl mb-2">🩺</div>
+      <h3 className="font-semibold text-slate-800 text-sm">
+        Veterinarians
+      </h3>
+      <p className="text-xs text-slate-500 mt-1">
+        Manage medical staff
+      </p>
+    </button>
 
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </button>
+    <button
+      onClick={() => navigate("/admin/pets")}
+      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
+    >
+      <div className="text-2xl mb-2">🐾</div>
+      <h3 className="font-semibold text-slate-800 text-sm">
+        Manage Pets
+      </h3>
+      <p className="text-xs text-slate-500 mt-1">
+        View registered pets
+      </p>
+    </button>
 
-            <button
-              onClick={() => navigate("/admin/veterinarians")}
-              className="w-full px-4 py-4 flex items-center justify-between text-left"
-            >
-              <span className="flex items-center gap-3 text-sm text-slate-700">
-                <Stethoscope className="w-5 h-5 text-blue-600" />
-                Manage Veterinarians
-              </span>
+    <button
+      onClick={() => navigate("/admin/analytics")}
+      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
+    >
+      <div className="text-2xl mb-2">📊</div>
+      <h3 className="font-semibold text-slate-800 text-sm">
+        Analytics
+      </h3>
+      <p className="text-xs text-slate-500 mt-1">
+        View system metrics
+      </p>
+    </button>
 
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </button>
+    <button
+      onClick={() => navigate("/admin/notifications")}
+      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
+    >
+      <div className="text-2xl mb-2">🔔</div>
+      <h3 className="font-semibold text-slate-800 text-sm">
+        Notifications
+      </h3>
+      <p className="text-xs text-slate-500 mt-1">
+        View system alerts
+      </p>
+    </button>
 
-            <button
-              onClick={() => navigate("/admin/pets")}
-              className="w-full px-4 py-4 flex items-center justify-between text-left"
-            >
-              <span className="flex items-center gap-3 text-sm text-slate-700">
-                <Heart className="w-5 h-5 text-blue-600" />
-                Manage Pets
-              </span>
+    <button
+      onClick={() => navigate("/admin/reports")}
+      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
+    >
+      <div className="text-2xl mb-2">📄</div>
+      <h3 className="font-semibold text-slate-800 text-sm">
+        Reports
+      </h3>
+      <p className="text-xs text-slate-500 mt-1">
+        View system reports
+      </p>
+    </button>
 
-              <ChevronRight className="w-4 h-4 text-slate-400" />
-            </button>
+    <button
+      onClick={() => navigate("/admin/settings")}
+      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
+    >
+      <div className="text-2xl mb-2">⚙️</div>
+      <h3 className="font-semibold text-slate-800 text-sm">
+        Settings
+      </h3>
+      <p className="text-xs text-slate-500 mt-1">
+        Configure platform
+      </p>
+    </button>
 
-          </div>
-        </div>
+    <button
+      onClick={() => navigate("/admin/profile")}
+      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
+    >
+      <div className="text-2xl mb-2">👤</div>
+      <h3 className="font-semibold text-slate-800 text-sm">
+        Profile
+      </h3>
+      <p className="text-xs text-slate-500 mt-1">
+        Manage admin account
+      </p>
+    </button>
+
+  </div>
+</div>
 
       </div>
     </div>
