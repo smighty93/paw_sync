@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
   Stethoscope,
   Heart,
-  Calendar,
   User,
-  ChevronRight,
+  ChevronDown,
+  LayoutDashboard,
+  LogOut,
   Activity,
 } from "lucide-react";
 
@@ -34,11 +35,21 @@ const mobileUsers = [
 function AdminMobileDashboard() {
   const navigate = useNavigate();
 
+  const [showProfile, setShowProfile] = useState(false);
+  const [showDashboards, setShowDashboards] = useState(false);
+
+  const switchDashboard = (path) => {
+    setShowProfile(false);
+    setShowDashboards(false);
+    navigate(path);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 pb-6">
 
-      {/* Header */}
-      <div className="bg-white px-4 py-4 border-b border-slate-100 flex items-center justify-between">
+      {/* ================= HEADER ================= */}
+      <div className="bg-white px-4 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 z-50">
+
         <div>
           <p className="text-xs text-slate-500">
             Admin Dashboard
@@ -49,18 +60,124 @@ function AdminMobileDashboard() {
           </h1>
         </div>
 
-        <button
-          onClick={() => navigate("/admin/profile")}
-          className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center"
-        >
-          <User className="w-5 h-5 text-blue-600" />
-        </button>
+        {/* PROFILE */}
+        <div className="relative">
+
+          <button
+            onClick={() => {
+              setShowProfile(!showProfile);
+              setShowDashboards(false);
+            }}
+            className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center"
+          >
+            <User className="w-5 h-5 text-blue-600" />
+          </button>
+
+          {/* ================= PROFILE MENU ================= */}
+          {showProfile && (
+            <div className="absolute right-0 top-12 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-[100]">
+
+              {/* USER INFO */}
+              <div className="px-4 py-3 border-b border-slate-100">
+                <p className="font-semibold text-slate-800">
+                  Admin
+                </p>
+
+                <p className="text-xs text-slate-500">
+                  Administrator
+                </p>
+              </div>
+
+              {/* SWITCH DASHBOARD */}
+              <button
+                onClick={() =>
+                  setShowDashboards(!showDashboards)
+                }
+                className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+              >
+                <span className="flex items-center gap-3">
+                  <LayoutDashboard className="w-4 h-4" />
+                  Switch Dashboard
+                </span>
+
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${
+                    showDashboards ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {/* DASHBOARD OPTIONS */}
+              {showDashboards && (
+                <div className="mx-3 mb-2 rounded-lg bg-slate-50 p-1">
+
+                  {/* ADMIN */}
+                  <button
+                    onClick={() =>
+                      switchDashboard("/admin")
+                    }
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm text-slate-700 hover:bg-white"
+                  >
+                    <span>👑</span>
+                    <span>Admin Dashboard</span>
+                  </button>
+
+                  {/* VETERINARIAN */}
+                  <button
+                    onClick={() =>
+                      switchDashboard("/veterinarian")
+                    }
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm text-slate-700 hover:bg-white"
+                  >
+                    <Stethoscope className="w-4 h-4 text-blue-600" />
+                    <span>Veterinarian Dashboard</span>
+                  </button>
+
+                  {/* PET OWNER */}
+                  <button
+                    onClick={() =>
+                      switchDashboard("/dashboard")
+                    }
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm text-slate-700 hover:bg-white"
+                  >
+                    <span>🐾</span>
+                    <span>Pet Owner Dashboard</span>
+                  </button>
+
+                </div>
+              )}
+
+              {/* PROFILE */}
+              <button
+                onClick={() => {
+                  setShowProfile(false);
+                  navigate("/admin/profile");
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+              >
+                <User className="w-4 h-4" />
+                Profile
+              </button>
+
+              {/* LOGOUT */}
+              <button
+                onClick={() => navigate("/")}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+
+            </div>
+          )}
+
+        </div>
       </div>
 
-      {/* Content */}
+      {/* ================= CONTENT ================= */}
       <div className="p-4 space-y-5">
 
-        {/* Welcome Card */}
+        {/* WELCOME CARD */}
         <div className="bg-gradient-to-r from-blue-700 to-blue-600 rounded-2xl p-5 text-white shadow-md">
           <p className="text-blue-100 text-sm">
             PawSync Healthcare Network
@@ -75,7 +192,7 @@ function AdminMobileDashboard() {
           </p>
         </div>
 
-        {/* Statistics */}
+        {/* STATISTICS */}
         <div className="grid grid-cols-2 gap-3">
 
           <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
@@ -114,64 +231,15 @@ function AdminMobileDashboard() {
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-            <div className="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center">
-              <Stethoscope className="w-5 h-5 text-indigo-600" />
-            </div>
-
-            <p className="text-xs text-slate-500 mt-3">
-              Veterinarians
-            </p>
-
-            <p className="text-xl font-bold text-slate-800">
-              84
-            </p>
-
-            <p className="text-xs text-emerald-600 mt-1">
-              +4%
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-emerald-600" />
-            </div>
-
-            <p className="text-xs text-slate-500 mt-3">
-              Appointments
-            </p>
-
-            <p className="text-xl font-bold text-slate-800">
-              42
-            </p>
-
-            <p className="text-xs text-emerald-600 mt-1">
-              +8%
-            </p>
-          </div>
-
         </div>
 
-        {/* Recent Registrations */}
+        {/* REGISTERED USERS */}
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm">
 
-          <div className="px-4 py-4 flex items-center justify-between border-b border-slate-100">
-            <div>
-              <h2 className="font-semibold text-slate-800">
-                Recent Registrations
-              </h2>
-
-              <p className="text-xs text-slate-500 mt-1">
-                Latest users
-              </p>
-            </div>
-
-            <button
-              onClick={() => navigate("/admin/users")}
-              className="text-sm text-blue-600 font-semibold"
-            >
-              View All
-            </button>
+          <div className="p-4 border-b border-slate-100">
+            <h2 className="font-semibold text-slate-800">
+              Recent Users
+            </h2>
           </div>
 
           <div className="divide-y divide-slate-100">
@@ -210,7 +278,7 @@ function AdminMobileDashboard() {
           </div>
         </div>
 
-        {/* System Status */}
+        {/* SYSTEM STATUS */}
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
 
           <div className="flex items-center justify-between mb-4">
@@ -265,125 +333,68 @@ function AdminMobileDashboard() {
           </div>
         </div>
 
-        {/* Quick Management */}
-<div className="space-y-4">
-  <div>
-    <h2 className="text-lg font-bold text-slate-900">
-      Quick Management
-    </h2>
-    <p className="text-sm text-slate-500 mt-1">
-      Quickly access and manage PawSync resources.
-    </p>
-  </div>
+        {/* QUICK MANAGEMENT */}
+        <div className="space-y-4">
 
-  <div className="grid grid-cols-2 gap-3">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">
+              Quick Management
+            </h2>
 
-    <button
-      onClick={() => navigate("/admin/users")}
-      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
-    >
-      <div className="text-2xl mb-2">👥</div>
-      <h3 className="font-semibold text-slate-800 text-sm">
-        Manage Users
-      </h3>
-      <p className="text-xs text-slate-500 mt-1">
-        View pet owners
-      </p>
-    </button>
+            <p className="text-sm text-slate-500 mt-1">
+              Quickly access and manage PawSync resources.
+            </p>
+          </div>
 
-    <button
-      onClick={() => navigate("/admin/veterinarians")}
-      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
-    >
-      <div className="text-2xl mb-2">🩺</div>
-      <h3 className="font-semibold text-slate-800 text-sm">
-        Veterinarians
-      </h3>
-      <p className="text-xs text-slate-500 mt-1">
-        Manage medical staff
-      </p>
-    </button>
+          <div className="grid grid-cols-2 gap-3">
 
-    <button
-      onClick={() => navigate("/admin/pets")}
-      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
-    >
-      <div className="text-2xl mb-2">🐾</div>
-      <h3 className="font-semibold text-slate-800 text-sm">
-        Manage Pets
-      </h3>
-      <p className="text-xs text-slate-500 mt-1">
-        View registered pets
-      </p>
-    </button>
+            <button
+              onClick={() => navigate("/admin/users")}
+              className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left"
+            >
+              <div className="text-2xl mb-2">👥</div>
 
-    <button
-      onClick={() => navigate("/admin/analytics")}
-      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
-    >
-      <div className="text-2xl mb-2">📊</div>
-      <h3 className="font-semibold text-slate-800 text-sm">
-        Analytics
-      </h3>
-      <p className="text-xs text-slate-500 mt-1">
-        View system metrics
-      </p>
-    </button>
+              <h3 className="font-semibold text-slate-800 text-sm">
+                Manage Users
+              </h3>
 
-    <button
-      onClick={() => navigate("/admin/notifications")}
-      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
-    >
-      <div className="text-2xl mb-2">🔔</div>
-      <h3 className="font-semibold text-slate-800 text-sm">
-        Notifications
-      </h3>
-      <p className="text-xs text-slate-500 mt-1">
-        View system alerts
-      </p>
-    </button>
+              <p className="text-xs text-slate-500 mt-1">
+                View pet owners
+              </p>
+            </button>
 
-    <button
-      onClick={() => navigate("/admin/reports")}
-      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
-    >
-      <div className="text-2xl mb-2">📄</div>
-      <h3 className="font-semibold text-slate-800 text-sm">
-        Reports
-      </h3>
-      <p className="text-xs text-slate-500 mt-1">
-        View system reports
-      </p>
-    </button>
+            <button
+              onClick={() => navigate("/admin/veterinarians")}
+              className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left"
+            >
+              <div className="text-2xl mb-2">🩺</div>
 
-    <button
-      onClick={() => navigate("/admin/settings")}
-      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
-    >
-      <div className="text-2xl mb-2">⚙️</div>
-      <h3 className="font-semibold text-slate-800 text-sm">
-        Settings
-      </h3>
-      <p className="text-xs text-slate-500 mt-1">
-        Configure platform
-      </p>
-    </button>
+              <h3 className="font-semibold text-slate-800 text-sm">
+                Veterinarians
+              </h3>
 
-    <button
-      onClick={() => navigate("/admin/profile")}
-      className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:shadow-md transition"
-    >
-      <div className="text-2xl mb-2">👤</div>
-      <h3 className="font-semibold text-slate-800 text-sm">
-        Profile
-      </h3>
-      <p className="text-xs text-slate-500 mt-1">
-        Manage admin account
-      </p>
-    </button>
+              <p className="text-xs text-slate-500 mt-1">
+                Manage medical staff
+              </p>
+            </button>
 
-  </div>
-</div>
+            <button
+              onClick={() => navigate("/admin/pets")}
+              className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left"
+            >
+              <div className="text-2xl mb-2">🐾</div>
+
+              <h3 className="font-semibold text-slate-800 text-sm">
+                Manage Pets
+              </h3>
+
+              <p className="text-xs text-slate-500 mt-1">
+                View registered pets
+              </p>
+            </button>
+
+          </div>
+        </div>
 
       </div>
     </div>
