@@ -1,16 +1,22 @@
-import { useState } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
+  User,
   ChevronDown,
   LayoutDashboard,
   Stethoscope,
   LogOut,
-  User,
 } from "lucide-react";
 
-import ownerMenu from "../../config/menus/ownerMenu";
+import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
+import StatsGrid from "../../components/dashboard/StatsGrid";
+import QuickActions from "../../components/dashboard/QuickActions";
+import MyPets from "../../components/dashboard/MyPets";
+import UpcomingAppointments from "../../components/dashboard/UpcomingAppointments.jsx";
+import VaccinationReminder from "../../components/dashboard/VaccinationReminder";
+import RecentActivity from "../../components/dashboard/RecentActivity";
 
-function OwnerDashboardLayout({ children }) {
+function OwnerMobileDashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [showDashboards, setShowDashboards] = useState(false);
 
@@ -23,62 +29,41 @@ function OwnerDashboardLayout({ children }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50">
 
-      {/* ================= SIDEBAR ================= */}
-      <aside className="w-64 bg-white border-r border-slate-100 flex flex-col fixed inset-y-0 left-0 z-20">
+      {/* MOBILE HEADER */}
+      <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 sticky top-0 z-50">
 
         {/* Logo */}
-        <div className="p-6">
-          <div className="text-xl font-bold text-blue-600 flex items-center gap-2">
-            <span>🐾 PawSync</span>
-          </div>
+        <div className="text-lg font-bold text-blue-600">
+          🐾 PawSync
         </div>
 
-        {/* Owner Menu */}
-        <nav className="flex-1 px-4 space-y-1">
-          {ownerMenu.map((item) => {
-            const Icon = item.icon;
+        {/* Profile */}
+        <div className="relative">
 
-            return (
-              <NavLink
-                key={item.title}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-blue-50 text-blue-600 font-semibold"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                  }`
-                }
-              >
-                <Icon className="w-5 h-5" />
-                {item.title}
-              </NavLink>
-            );
-          })}
-        </nav>
-      </aside>
+          <button
+            onClick={() => setShowProfile(!showProfile)}
+            className="flex items-center gap-2"
+          >
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <User className="w-5 h-5 text-blue-600" />
+            </div>
 
-      {/* ================= MAIN AREA ================= */}
-      <div className="flex-1 ml-64">
+            <ChevronDown
+              className={`w-4 h-4 text-slate-500 transition-transform ${
+                showProfile ? "rotate-180" : ""
+              }`}
+            />
+          </button>
 
-        {/* ================= TOP HEADER ================= */}
-        <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-end px-8 sticky top-0 z-10">
+          {/* PROFILE DROPDOWN */}
+          {showProfile && (
+            <div className="absolute right-0 top-12 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-[100]">
 
-          <div className="relative">
-
-            {/* Profile Button */}
-            <button
-              onClick={() => setShowProfile(!showProfile)}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors"
-            >
-              <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
-                <User className="w-5 h-5 text-blue-600" />
-              </div>
-
-              <div className="text-left hidden sm:block">
-                <p className="text-sm font-semibold text-slate-800">
+              {/* User */}
+              <div className="px-4 py-3 border-b border-slate-100">
+                <p className="font-semibold text-slate-800">
                   Pet Owner
                 </p>
 
@@ -87,106 +72,101 @@ function OwnerDashboardLayout({ children }) {
                 </p>
               </div>
 
-              <ChevronDown className="w-4 h-4 text-slate-500" />
-            </button>
+              {/* Switch Dashboard */}
+              <button
+                onClick={() => setShowDashboards(!showDashboards)}
+                className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+              >
+                <span className="flex items-center gap-3">
+                  <LayoutDashboard className="w-4 h-4" />
+                  Switch Dashboard
+                </span>
 
-            {/* ================= PROFILE DROPDOWN ================= */}
-            {showProfile && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-100 py-2">
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${
+                    showDashboards ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
 
-                {/* Profile Info */}
-                <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="font-semibold text-slate-800">
-                    Pet Owner
-                  </p>
+              {/* DASHBOARD OPTIONS */}
+              {showDashboards && (
+                <div className="mx-3 mb-2 rounded-lg bg-slate-50 p-1">
 
-                  <p className="text-xs text-slate-500">
-                    PawSync Member
-                  </p>
+                  <button
+                    onClick={() => switchDashboard("/admin")}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm hover:bg-white"
+                  >
+                    👑
+                    <span>Admin Dashboard</span>
+                  </button>
+
+                  <button
+                    onClick={() => switchDashboard("/veterinarian")}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm hover:bg-white"
+                  >
+                    <Stethoscope className="w-4 h-4 text-blue-600" />
+                    <span>Veterinarian Dashboard</span>
+                  </button>
+
+                  <button
+                    onClick={() => switchDashboard("/dashboard")}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-md text-sm hover:bg-white"
+                  >
+                    🐾
+                    <span>Pet Owner Dashboard</span>
+                  </button>
+
                 </div>
+              )}
 
-                {/* Switch Dashboard */}
-                <button
-                  onClick={() => setShowDashboards(!showDashboards)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
-                >
-                  <span className="flex items-center gap-3">
-                    <LayoutDashboard className="w-4 h-4" />
-                    Switch Dashboard
-                  </span>
+              {/* Profile */}
+              <button
+                onClick={() => navigate("/profile")}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+              >
+                <User className="w-4 h-4" />
+                Profile
+              </button>
 
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      showDashboards ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
+              {/* Logout */}
+              <button
+                onClick={() => navigate("/")}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
 
-                {/* Dashboard Options */}
-                {showDashboards && (
-                  <div className="mx-3 mb-2 rounded-lg bg-slate-50 p-1">
+            </div>
+          )}
 
-                    {/* Admin */}
-                    <button
-                      onClick={() => switchDashboard("/admin")}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm hover:bg-white"
-                    >
-                      👑
-                      <span>Admin Dashboard</span>
-                    </button>
+        </div>
+      </header>
 
-                    {/* Veterinarian */}
-                    <button
-                      onClick={() => switchDashboard("/veterinarian")}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm hover:bg-white"
-                    >
-                      <Stethoscope className="w-4 h-4 text-blue-600" />
-                      <span>Veterinarian Dashboard</span>
-                    </button>
+      {/* CONTENT */}
+      <main className="p-4">
+        <div className="space-y-6">
 
-                    {/* Pet Owner */}
-                    <button
-                      onClick={() => switchDashboard("/dashboard")}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm hover:bg-white"
-                    >
-                      🐾
-                      <span>Pet Owner Dashboard</span>
-                    </button>
+          <WelcomeBanner />
 
-                  </div>
-                )}
+          <StatsGrid />
 
-                {/* Profile */}
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
-                >
-                  <User className="w-4 h-4" />
-                  Profile
-                </button>
+          <QuickActions />
 
-                {/* Logout */}
-                <button
-                  onClick={() => navigate("/")}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
+          <MyPets />
 
-              </div>
-            )}
-          </div>
-        </header>
+          <UpcomingAppointments />
 
-        {/* ================= PAGE CONTENT ================= */}
-        <main className="p-8">
-          {children}
-        </main>
+          <VaccinationReminder />
 
-      </div>
+          <RecentActivity />
+
+        </div>
+      </main>
+
     </div>
   );
 }
 
-export default OwnerDashboardLayout;
+export default OwnerMobileDashboard;
