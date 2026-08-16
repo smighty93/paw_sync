@@ -1,4 +1,4 @@
-import DashboardLayout from "../../components/layout/DashboardLayout";
+import OwnerDashboardLayout from "../../components/layout/OwnerDashboardLayout";
 import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
 import StatsGrid from "../../components/dashboard/StatsGrid";
 import QuickActions from "../../components/dashboard/QuickActions";
@@ -9,7 +9,7 @@ import RecentActivity from "../../components/dashboard/RecentActivity";
 
 function Dashboard() {
   return (
-    <DashboardLayout>
+    <OwnerDashboardLayout>
       {/* Welcome Banner */}
       <WelcomeBanner />
 
@@ -34,7 +34,7 @@ function Dashboard() {
 
         <RecentActivity />
       </div>
-    </DashboardLayout>
+    </OwnerDashboardLayout>
   );
 }
 

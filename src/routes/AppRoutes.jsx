@@ -8,6 +8,7 @@ import Register from "../pages/auth/Register";
 import OwnerDashboard from "../pages/owner/Dashboard";
 
 // Veterinarian
+import VetMobileDashboard from "../pages/veterinarian/VetMobileDashboard";
 import VeterinarianDashboard from "../pages/veterinarian/Dashboard";
 import Appointments from "../pages/veterinarian/Appointments";
 import MedicalReports from "../pages/veterinarian/MedicalReports";
@@ -18,6 +19,7 @@ import Vaccinations from "../pages/veterinarian/Vaccinations";
 import VeterinarianProfile from "../pages/veterinarian/VeterinarianProfile";
 
 // Admin
+import AdminMobileDashboard from "../pages/admin/AdminMobileDashboard";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import ManageUsers from "../pages/admin/ManageUsers";
 import ManagePets from "../pages/admin/ManagePets";
@@ -42,9 +44,21 @@ function AppRoutes() {
 
         {/* ================= VETERINARIAN ================= */}
         <Route
-          path="/veterinarian"
-          element={<VeterinarianDashboard />}
-        />
+  path="/veterinarian"
+  element={
+    <>
+      {/* Desktop */}
+      <div className="hidden lg:block">
+        <VeterinarianDashboard  />
+      </div>
+
+      {/* Mobile */}
+      <div className="block lg:hidden">
+        <VetMobileDashboard />
+      </div>
+    </>
+  }
+/>
 
         <Route
           path="/veterinarian/appointments"
@@ -83,9 +97,19 @@ function AppRoutes() {
 
         {/* ================= ADMIN ================= */}
         <Route
-          path="/admin"
-          element={<AdminDashboard />}
-        />
+  path="/admin"
+  element={
+    <>
+      <div className="hidden lg:block">
+        <AdminDashboard />
+      </div>
+
+      <div className="block lg:hidden">
+        <AdminMobileDashboard />
+      </div>
+    </>
+  }
+/>
 
         <Route
           path="/admin/users"

@@ -15,7 +15,7 @@ export default function AdminDashboard() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Welcome Card */}
-        <div className="bg-gradient-to-r from-blue-700 to-blue-600 rounded-2xl p-6 text-white shadow-md">
+        <div className="bg-gradient-to-r from-blue-700 to-blue-600 rounded-2xl p-4 sm:p-6 text-white shadow-md">
           <h1 className="text-2xl font-bold">Welcome back, Admin! 👋</h1>
           <p className="text-blue-100 mt-1 text-sm">
             Here is what's happening across the PawSync healthcare network today.
@@ -46,15 +46,15 @@ export default function AdminDashboard() {
                 </span>
               </div>
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between py-2 border-b border-slate-100">
+                <div className="flex flex-col min-[400px]:flex-row min-[400px]:justify-between gap-1 py-2 border-b border-slate-100">
                   <span className="text-slate-500">Medical Records DB</span>
                   <span className="text-emerald-600 font-medium">Operational</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-100">
+                <div className="flex flex-col min-[400px]:flex-row min-[400px]:justify-between gap-1 py-2 border-b border-slate-100">
                   <span className="text-slate-500">Sync Engine</span>
                   <span className="text-emerald-600 font-medium">Operational</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-slate-100">
+                <div className="flex flex-col min-[400px]:flex-row min-[400px]:justify-between gap-1 py-2 border-b border-slate-100">
                   <span className="text-slate-500">Telehealth API</span>
                   <span className="text-emerald-600 font-medium">Operational</span>
                 </div>

@@ -1,33 +1,16 @@
-import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, NavLink } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Users,
-  UserCheck,
-  Dog,
-  BarChart2,
-  Bell,
-  User,
   ChevronDown,
+  LayoutDashboard,
   Stethoscope,
   LogOut,
+  User,
 } from "lucide-react";
 
-const adminNavItems = [
-  { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
-  { name: "Manage Users", path: "/admin/users", icon: Users },
-  {
-    name: "Manage Veterinarians",
-    path: "/admin/veterinarians",
-    icon: UserCheck,
-  },
-  { name: "Manage Pets", path: "/admin/pets", icon: Dog },
-  { name: "System Analytics", path: "/admin/analytics", icon: BarChart2 },
-  { name: "Notifications", path: "/admin/notifications", icon: Bell },
-  { name: "Profile", path: "/admin/profile", icon: User },
-];
+import ownerMenu from "../../config/menus/ownerMenu";
 
-export default function DashboardLayout({ children }) {
+function OwnerDashboardLayout({ children }) {
   const [showProfile, setShowProfile] = useState(false);
   const [showDashboards, setShowDashboards] = useState(false);
 
@@ -52,29 +35,33 @@ export default function DashboardLayout({ children }) {
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Owner Menu */}
         <nav className="flex-1 px-4 space-y-1">
-          {adminNavItems.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-blue-50 text-blue-600 font-semibold"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`
-              }
-            >
-              <item.icon className="w-5 h-5" />
-              {item.name}
-            </NavLink>
-          ))}
+          {ownerMenu.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <NavLink
+                key={item.title}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-blue-50 text-blue-600 font-semibold"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`
+                }
+              >
+                <Icon className="w-5 h-5" />
+                {item.title}
+              </NavLink>
+            );
+          })}
         </nav>
       </aside>
 
       {/* ================= MAIN AREA ================= */}
-      <div className="flex-1 pl-64">
+      <div className="flex-1 ml-64">
 
         {/* ================= TOP HEADER ================= */}
         <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-end px-8 sticky top-0 z-10">
@@ -90,13 +77,13 @@ export default function DashboardLayout({ children }) {
                 <User className="w-5 h-5 text-blue-600" />
               </div>
 
-              <div className="text-left">
+              <div className="text-left hidden sm:block">
                 <p className="text-sm font-semibold text-slate-800">
-                  Admin
+                  Pet Owner
                 </p>
 
                 <p className="text-xs text-slate-500">
-                  Administrator
+                  PawSync Member
                 </p>
               </div>
 
@@ -107,14 +94,14 @@ export default function DashboardLayout({ children }) {
             {showProfile && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-slate-100 py-2">
 
-                {/* User Info */}
+                {/* Profile Info */}
                 <div className="px-4 py-3 border-b border-slate-100">
                   <p className="font-semibold text-slate-800">
-                    Admin
+                    Pet Owner
                   </p>
 
                   <p className="text-xs text-slate-500">
-                    Administrator
+                    PawSync Member
                   </p>
                 </div>
 
@@ -139,6 +126,7 @@ export default function DashboardLayout({ children }) {
                 {showDashboards && (
                   <div className="mx-3 mb-2 rounded-lg bg-slate-50 p-1">
 
+                    {/* Admin */}
                     <button
                       onClick={() => switchDashboard("/admin")}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm hover:bg-white"
@@ -147,6 +135,7 @@ export default function DashboardLayout({ children }) {
                       <span>Admin Dashboard</span>
                     </button>
 
+                    {/* Veterinarian */}
                     <button
                       onClick={() => switchDashboard("/veterinarian")}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm hover:bg-white"
@@ -155,6 +144,7 @@ export default function DashboardLayout({ children }) {
                       <span>Veterinarian Dashboard</span>
                     </button>
 
+                    {/* Pet Owner */}
                     <button
                       onClick={() => switchDashboard("/dashboard")}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm hover:bg-white"
@@ -168,7 +158,7 @@ export default function DashboardLayout({ children }) {
 
                 {/* Profile */}
                 <button
-                  onClick={() => navigate("/admin/profile")}
+                  onClick={() => navigate("/profile")}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
                 >
                   <User className="w-4 h-4" />
@@ -186,18 +176,17 @@ export default function DashboardLayout({ children }) {
 
               </div>
             )}
-
           </div>
         </header>
 
         {/* ================= PAGE CONTENT ================= */}
-        <main>
-          <div className="p-8">
-            {children}
-          </div>
+        <main className="p-8">
+          {children}
         </main>
 
       </div>
     </div>
   );
 }
+
+export default OwnerDashboardLayout;

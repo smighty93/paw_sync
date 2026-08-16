@@ -16,7 +16,7 @@ function MyPets() {
 
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
 
         <PetCard
           image="https://images.unsplash.com/photo-1558788353-f76d92427f16?w=800"
