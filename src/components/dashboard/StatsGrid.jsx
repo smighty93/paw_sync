@@ -1,43 +1,234 @@
-import StatCard from "./StatCard";
-import {
-  PawPrint,
-  CalendarDays,
-  Syringe,
-  HeartPulse,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
 function StatsGrid() {
+  const [stats, setStats] = useState({
+    pets: 0,
+    appointments: 0,
+    vaccinations: 0,
+    healthStatus: "Good",
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  async function loadStats() {
+    setLoading(true);
+    setError("");
+
+    try {
+      // -----------------------------------------
+      // Get logged-in user
+      // -----------------------------------------
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        throw userError;
+      }
+
+      if (!user) {
+        throw new Error("You are not logged in.");
+      }
+
+      // -----------------------------------------
+      // 1. Get owner's pets
+      // -----------------------------------------
+
+      const {
+        data: pets,
+        error: petsError,
+      } = await supabase
+        .from("pets")
+        .select("id")
+        .eq("owner_id", user.id);
+
+      if (petsError) {
+        throw petsError;
+      }
+
+      const petList = pets || [];
+      const petIds = petList.map((pet) => pet.id);
+
+      // -----------------------------------------
+      // No pets
+      // -----------------------------------------
+
+      if (petIds.length === 0) {
+        setStats({
+          pets: 0,
+          appointments: 0,
+          vaccinations: 0,
+          healthStatus: "No Pets",
+        });
+
+        return;
+      }
+
+      // -----------------------------------------
+      // 2. Get appointments
+      // -----------------------------------------
+
+      const {
+        data: appointments,
+        error: appointmentsError,
+      } = await supabase
+        .from("appointments")
+        .select("id")
+        .in("pet_id", petIds);
+
+      if (appointmentsError) {
+        throw appointmentsError;
+      }
+
+      const appointmentCount =
+        appointments?.length || 0;
+
+      // -----------------------------------------
+      // 3. Get vaccinations
+      //
+      // IMPORTANT:
+      // Vaccinations come from the vaccinations
+      // table, not medical_records.
+      // -----------------------------------------
+
+      const {
+        data: vaccinations,
+        error: vaccinationsError,
+      } = await supabase
+        .from("vaccinations")
+        .select("id")
+        .in("pet_id", petIds);
+
+      if (vaccinationsError) {
+        throw vaccinationsError;
+      }
+
+      const vaccinationCount =
+        vaccinations?.length || 0;
+
+      // -----------------------------------------
+      // 4. Health status
+      // -----------------------------------------
+      //
+      // At this stage there is no dedicated
+      // health-status field in the dashboard
+      // data being used here.
+      //
+      // Therefore we keep the existing status
+      // behavior rather than inventing a health
+      // calculation.
+      // -----------------------------------------
+
+      const healthStatus = "Good";
+
+      // -----------------------------------------
+      // Update dashboard statistics
+      // -----------------------------------------
+
+      setStats({
+        pets: petList.length,
+        appointments: appointmentCount,
+        vaccinations: vaccinationCount,
+        healthStatus,
+      });
+    } catch (err) {
+      console.error(
+        "Error loading dashboard statistics:",
+        err
+      );
+
+      setError(
+        err.message ||
+          "Failed to load dashboard statistics."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="grid grid-cols-4 gap-6 mt-8">
+    <div>
+      {/* Error */}
 
-      <StatCard
-        icon={<PawPrint size={28} />}
-        title="My Pets"
-        value="3"
-        subtitle="Registered"
-      />
+      {error && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm text-red-600">
+            {error}
+          </p>
 
-      <StatCard
-        icon={<CalendarDays size={28} />}
-        title="Appointments"
-        value="2"
-        subtitle="Upcoming"
-      />
+          <button
+            type="button"
+            onClick={loadStats}
+            className="mt-2 text-sm font-semibold text-red-700 hover:underline"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
 
-      <StatCard
-        icon={<Syringe size={28} />}
-        title="Vaccinations"
-        value="1"
-        subtitle="Due"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {/* My Pets */}
 
-      <StatCard
-        icon={<HeartPulse size={28} />}
-        title="Health Status"
-        value="Good"
-        subtitle="Overall"
-      />
+        <div className="bg-white rounded-2xl shadow-md p-6">
+          <p className="text-slate-500">
+            My Pets
+          </p>
 
+          <p className="text-3xl font-bold text-slate-900 mt-2">
+            {loading ? "..." : stats.pets}
+          </p>
+        </div>
+
+        {/* Appointments */}
+
+        <div className="bg-white rounded-2xl shadow-md p-6">
+          <p className="text-slate-500">
+            Appointments
+          </p>
+
+          <p className="text-3xl font-bold text-slate-900 mt-2">
+            {loading
+              ? "..."
+              : stats.appointments}
+          </p>
+        </div>
+
+        {/* Vaccinations */}
+
+        <div className="bg-white rounded-2xl shadow-md p-6">
+          <p className="text-slate-500">
+            Vaccinations
+          </p>
+
+          <p className="text-3xl font-bold text-slate-900 mt-2">
+            {loading
+              ? "..."
+              : stats.vaccinations}
+          </p>
+        </div>
+
+        {/* Health Status */}
+
+        <div className="bg-white rounded-2xl shadow-md p-6">
+          <p className="text-slate-500">
+            Health Status
+          </p>
+
+          <p className="text-3xl font-bold text-slate-900 mt-2">
+            {loading
+              ? "..."
+              : stats.healthStatus}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

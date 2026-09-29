@@ -1,184 +1,303 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import VetDashboardLayout from "../../components/layout/VetDashboardLayout";
-
-const reports = [
-  {
-    id: 1,
-    petName: "Max",
-    ownerName: "John Smith",
-    reportType: "General Checkup",
-    date: "2026-08-10",
-    veterinarian: "Dr. Sarah Johnson",
-    status: "Completed",
-  },
-  {
-    id: 2,
-    petName: "Bella",
-    ownerName: "Emily Davis",
-    reportType: "Vaccination Report",
-    date: "2026-08-09",
-    veterinarian: "Dr. Sarah Johnson",
-    status: "Completed",
-  },
-  {
-    id: 3,
-    petName: "Charlie",
-    ownerName: "Michael Brown",
-    reportType: "Blood Test",
-    date: "2026-08-08",
-    veterinarian: "Dr. Sarah Johnson",
-    status: "Pending",
-  },
-  {
-    id: 4,
-    petName: "Luna",
-    ownerName: "Sophia Wilson",
-    reportType: "Medical Examination",
-    date: "2026-08-07",
-    veterinarian: "Dr. Sarah Johnson",
-    status: "Completed",
-  },
-];
+import { supabase } from "../../lib/supabase";
 
 function MedicalReports() {
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadReports();
+  }, []);
+
+  async function loadReports() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        throw userError;
+      }
+
+      if (!user) {
+        throw new Error("You are not logged in.");
+      }
+
+      const { data, error: reportsError } = await supabase
+        .from("medical_records")
+        .select(`
+          id,
+          pet_id,
+          veterinarian_id,
+          diagnosis,
+          treatment,
+          notes,
+          record_date,
+          created_at,
+          pets (
+            id,
+            name,
+            species,
+            breed,
+            owner_id
+          )
+        `)
+        .eq("veterinarian_id", user.id)
+        .order("record_date", {
+          ascending: false,
+        });
+
+      if (reportsError) {
+        throw reportsError;
+      }
+
+      const medicalRecords = data || [];
+
+      const ownerIds = [
+        ...new Set(
+          medicalRecords
+            .map((record) => record.pets?.owner_id)
+            .filter(Boolean)
+        ),
+      ];
+
+      let profiles = [];
+
+      if (ownerIds.length > 0) {
+        const {
+          data: profileData,
+          error: profilesError,
+        } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", ownerIds);
+
+        if (profilesError) {
+          throw profilesError;
+        }
+
+        profiles = profileData || [];
+      }
+
+      const formattedReports = medicalRecords.map((record) => {
+        const owner = profiles.find(
+          (profile) =>
+            profile.id === record.pets?.owner_id
+        );
+
+        return {
+          ...record,
+          petName: record.pets?.name || "Unknown Pet",
+          ownerName: owner?.full_name || "Unknown Owner",
+          reportType:
+            record.diagnosis || "Medical Examination",
+          status: "Completed",
+        };
+      });
+
+      setReports(formattedReports);
+    } catch (err) {
+      console.error("Error loading medical reports:", err);
+
+      setError(
+        err.message ||
+          "Failed to load medical reports."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function formatDate(date) {
+    if (!date) return "—";
+
+    return new Date(date).toLocaleDateString([], {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  const completedCount = reports.filter(
+    (report) => report.status === "Completed"
+  ).length;
+
   return (
     <VetDashboardLayout>
       <div className="space-y-6">
-        {/* Page Header */}
+        {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-slate-800">
             Medical Reports
           </h1>
 
-          <p className="text-slate-500 mt-1">
-            View and manage medical reports for your patients.
+          <p className="mt-1 text-slate-500">
+            View medical records for your patients.
           </p>
         </div>
 
+        {/* Error */}
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-red-700">
+            {error}
+          </div>
+        )}
+
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <p className="text-sm text-slate-500">
               Total Reports
             </p>
 
-            <p className="text-3xl font-bold text-slate-800 mt-2">
-              {reports.length}
+            <p className="mt-2 text-3xl font-bold text-slate-800">
+              {loading ? "—" : reports.length}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <p className="text-sm text-slate-500">
               Completed
             </p>
 
-            <p className="text-3xl font-bold text-emerald-600 mt-2">
-              {
-                reports.filter(
-                  (report) => report.status === "Completed"
-                ).length
-              }
+            <p className="mt-2 text-3xl font-bold text-emerald-600">
+              {loading ? "—" : completedCount}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+          <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
             <p className="text-sm text-slate-500">
-              Pending
+              Patients
             </p>
 
-            <p className="text-3xl font-bold text-amber-500 mt-2">
-              {
-                reports.filter(
-                  (report) => report.status === "Pending"
-                ).length
-              }
+            <p className="mt-2 text-3xl font-bold text-blue-600">
+              {loading
+                ? "—"
+                : new Set(
+                    reports.map(
+                      (report) => report.pet_id
+                    )
+                  ).size}
             </p>
           </div>
         </div>
 
-        {/* Reports Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-5 border-b border-slate-100">
-            <h2 className="text-lg font-semibold text-slate-800">
-              Recent Medical Reports
+        {/* Reports */}
+        {loading ? (
+          <div className="rounded-xl border border-slate-100 bg-white p-10 text-center shadow-sm">
+            <p className="text-slate-500">
+              Loading medical reports...
+            </p>
+          </div>
+        ) : reports.length === 0 ? (
+          <div className="rounded-xl border border-slate-100 bg-white p-10 text-center shadow-sm">
+            <h2 className="text-xl font-semibold text-slate-800">
+              No medical reports
             </h2>
+
+            <p className="mt-2 text-slate-500">
+              No medical records have been created for
+              your patients yet.
+            </p>
           </div>
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm">
+            <div className="border-b border-slate-100 p-5">
+              <h2 className="text-lg font-semibold text-slate-800">
+                Medical Reports
+              </h2>
+            </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="text-left px-5 py-3 text-sm font-semibold text-slate-600">
-                    Pet
-                  </th>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1000px]">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-5 py-3 text-left text-sm font-semibold text-slate-600">
+                      Pet
+                    </th>
 
-                  <th className="text-left px-5 py-3 text-sm font-semibold text-slate-600">
-                    Owner
-                  </th>
+                    <th className="px-5 py-3 text-left text-sm font-semibold text-slate-600">
+                      Owner
+                    </th>
 
-                  <th className="text-left px-5 py-3 text-sm font-semibold text-slate-600">
-                    Report Type
-                  </th>
+                    <th className="px-5 py-3 text-left text-sm font-semibold text-slate-600">
+                      Diagnosis
+                    </th>
 
-                  <th className="text-left px-5 py-3 text-sm font-semibold text-slate-600">
-                    Date
-                  </th>
+                    <th className="px-5 py-3 text-left text-sm font-semibold text-slate-600">
+                      Treatment
+                    </th>
 
-                  <th className="text-left px-5 py-3 text-sm font-semibold text-slate-600">
-                    Status
-                  </th>
+                    <th className="px-5 py-3 text-left text-sm font-semibold text-slate-600">
+                      Date
+                    </th>
 
-                  <th className="text-left px-5 py-3 text-sm font-semibold text-slate-600">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100">
-                {reports.map((report) => (
-                  <tr
-                    key={report.id}
-                    className="hover:bg-slate-50"
-                  >
-                    <td className="px-5 py-4 font-medium text-slate-800">
-                      {report.petName}
-                    </td>
-
-                    <td className="px-5 py-4 text-slate-600">
-                      {report.ownerName}
-                    </td>
-
-                    <td className="px-5 py-4 text-slate-600">
-                      {report.reportType}
-                    </td>
-
-                    <td className="px-5 py-4 text-slate-600">
-                      {report.date}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          report.status === "Completed"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700"
-                        }`}
-                      >
-                        {report.status}
-                      </span>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <button className="text-blue-600 hover:underline text-sm font-medium">
-                        View Report
-                      </button>
-                    </td>
+                    <th className="px-5 py-3 text-left text-sm font-semibold text-slate-600">
+                      Status
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody className="divide-y divide-slate-100">
+                  {reports.map((report) => (
+                    <tr
+                      key={report.id}
+                      className="hover:bg-slate-50"
+                    >
+                      <td className="px-5 py-4">
+                        <p className="font-semibold text-slate-800">
+                          {report.petName}
+                        </p>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                          {report.pets?.species || ""}
+
+                          {report.pets?.breed
+                            ? ` • ${report.pets.breed}`
+                            : ""}
+                        </p>
+                      </td>
+
+                      <td className="px-5 py-4 text-slate-600">
+                        {report.ownerName}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <p className="max-w-xs text-slate-700">
+                          {report.diagnosis || "—"}
+                        </p>
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <p className="max-w-xs text-slate-700">
+                          {report.treatment || "—"}
+                        </p>
+                      </td>
+
+                      <td className="px-5 py-4 text-slate-600">
+                        {formatDate(
+                          report.record_date
+                        )}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
+                          Completed
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </VetDashboardLayout>
   );

@@ -2,502 +2,300 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
-  CalendarDays,
-  FileText,
-  ClipboardList,
-  Pill,
-  Clock,
-  Syringe,
   User,
   ChevronDown,
   Stethoscope,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 
-const vetNavItems = [
-  {
-    name: "Dashboard",
-    path: "/veterinarian",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "Appointments",
-    path: "/veterinarian/appointments",
-    icon: CalendarDays,
-  },
-  {
-    name: "Medical Reports",
-    path: "/veterinarian/medical-reports",
-    icon: FileText,
-  },
-  {
-    name: "Patient Records",
-    path: "/veterinarian/patient-records",
-    icon: ClipboardList,
-  },
-  {
-    name: "Prescriptions",
-    path: "/veterinarian/prescriptions",
-    icon: Pill,
-  },
-  {
-    name: "Today's Appointments",
-    path: "/veterinarian/todays-appointments",
-    icon: Clock,
-  },
-  {
-    name: "Vaccinations",
-    path: "/veterinarian/vaccinations",
-    icon: Syringe,
-  },
-  {
-    name: "Profile",
-    path: "/veterinarian/profile",
-    icon: User,
-  },
-];
+import vetMenu from "../../config/menus/vetMenu";
+import { useAuth } from "../../context/AuthContext";
 
 export default function VetDashboardLayout({ children }) {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
   const [showProfile, setShowProfile] = useState(false);
   const [showDashboards, setShowDashboards] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  const navigate = useNavigate();
-
-  // ==============================
-  // SWITCH DASHBOARD
-  // ==============================
   const switchDashboard = (path) => {
     setShowProfile(false);
     setShowDashboards(false);
+    setShowMobileMenu(false);
     navigate(path);
   };
 
-  // ==============================
-  // PROFILE TOGGLE
-  // ==============================
-  const toggleProfile = () => {
-    setShowProfile((prev) => !prev);
+  const handleLogout = async () => {
+    setShowProfile(false);
     setShowDashboards(false);
+
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      navigate("/", { replace: true });
+    }
   };
 
-  // ==============================
-  // DASHBOARD TOGGLE
-  // ==============================
-  const toggleDashboards = () => {
-    setShowDashboards((prev) => !prev);
-  };
+  const displayName =
+    user?.user_metadata?.full_name || "Veterinarian";
 
   return (
     <div className="min-h-screen bg-slate-50">
 
-      {/* ================================================= */}
-      {/* DESKTOP SIDEBAR */}
-      {/* ================================================= */}
+      {/* ================= DESKTOP SIDEBAR ================= */}
+      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex-col">
 
-      <aside className="hidden md:flex w-64 bg-white border-r border-slate-100 flex-col fixed inset-y-0 left-0 z-20">
+        {/* Logo */}
+        <div className="h-16 flex items-center px-6 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm">
+              🐾
+            </div>
 
-        {/* LOGO */}
-        <div className="p-6">
-          <div className="text-xl font-bold text-blue-600 flex items-center gap-2">
-            <span>🐾 PawSync</span>
+            <span className="text-lg font-bold text-slate-800 tracking-tight">
+              Paw<span className="text-blue-600">Sync</span>
+            </span>
           </div>
         </div>
 
-        {/* NAVIGATION */}
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-
-          {vetNavItems.map((item) => {
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+          {vetMenu.map((item) => {
             const Icon = item.icon;
 
             return (
               <NavLink
-                key={item.name}
+                key={item.title}
                 to={item.path}
-                end={item.path === "/veterinarian"}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  `group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200 ${
                     isActive
                       ? "bg-blue-50 text-blue-600 font-semibold"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`
                 }
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                {({ isActive }) => (
+                  <>
+                    <Icon
+                      className={`w-[18px] h-[18px] ${
+                        isActive
+                          ? "text-blue-600"
+                          : "text-slate-400 group-hover:text-slate-600"
+                      }`}
+                    />
 
-                <span>{item.name}</span>
+                    <span>{item.title}</span>
+                  </>
+                )}
               </NavLink>
             );
           })}
-
         </nav>
+
+        {/* Bottom Info */}
+        <div className="p-4 border-t border-slate-100">
+          <div className="bg-slate-50 rounded-xl p-3">
+            <p className="text-xs font-medium text-slate-700">
+              Veterinary Portal
+            </p>
+
+            <p className="text-[11px] text-slate-400 mt-1">
+              PawSync Healthcare Network
+            </p>
+          </div>
+        </div>
       </aside>
 
-      {/* ================================================= */}
-      {/* MAIN AREA */}
-      {/* ================================================= */}
+      {/* ================= MOBILE SIDEBAR ================= */}
+      {showMobileMenu && (
+        <>
+          <div
+            className="fixed inset-0 bg-slate-900/30 backdrop-blur-[1px] z-40 md:hidden"
+            onClick={() => setShowMobileMenu(false)}
+          />
 
-      <div className="md:ml-64 min-h-screen">
+          <aside className="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 shadow-xl md:hidden">
 
-        {/* ================================================= */}
-        {/* TOP HEADER */}
-        {/* ================================================= */}
-
-        <header
-          className="
-            h-16
-            bg-white
-            border-b
-            border-slate-100
-            flex
-            items-center
-            justify-end
-            px-4
-            sm:px-8
-            sticky
-            top-0
-            z-[999]
-          "
-        >
-
-          {/* PROFILE CONTAINER */}
-
-          <div className="relative z-[9999]">
-
-            {/* ================================================= */}
-            {/* PROFILE BUTTON */}
-            {/* ================================================= */}
-
-            <button
-              type="button"
-              onClick={toggleProfile}
-              className="
-                flex
-                items-center
-                gap-3
-                px-3
-                py-2
-                rounded-lg
-                hover:bg-slate-50
-                transition-colors
-              "
-            >
-
-              {/* PROFILE ICON */}
-
-              <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <User className="w-5 h-5 text-blue-600" />
-              </div>
-
-              {/* PROFILE TEXT */}
-
-              <div className="text-left hidden sm:block">
-
-                <p className="text-sm font-semibold text-slate-800">
-                  Dr. Sarah Johnson
-                </p>
-
-                <p className="text-xs text-slate-500">
-                  Veterinarian
-                </p>
-
-              </div>
-
-              {/* ARROW */}
-
-              <ChevronDown
-                className={`
-                  w-4
-                  h-4
-                  text-slate-500
-                  transition-transform
-                  duration-200
-                  ${showProfile ? "rotate-180" : ""}
-                `}
-              />
-
-            </button>
-
-            {/* ================================================= */}
-            {/* PROFILE DROPDOWN */}
-            {/* ================================================= */}
-
-            {showProfile && (
-              <div
-                className="
-                  absolute
-                  right-0
-                  top-full
-                  mt-2
-                  w-64
-                  bg-white
-                  rounded-xl
-                  shadow-2xl
-                  border
-                  border-slate-200
-                  py-2
-                  z-[99999]
-                "
-              >
-
-                {/* USER INFORMATION */}
-
-                <div className="px-4 py-3 border-b border-slate-100">
-
-                  <p className="font-semibold text-slate-800">
-                    Dr. Sarah Johnson
-                  </p>
-
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Veterinarian
-                  </p>
-
+            {/* Mobile Header */}
+            <div className="h-16 px-5 flex items-center justify-between border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm">
+                  🐾
                 </div>
 
-                {/* ================================================= */}
-                {/* SWITCH DASHBOARD */}
-                {/* ================================================= */}
+                <span className="text-lg font-bold text-slate-800">
+                  Paw<span className="text-blue-600">Sync</span>
+                </span>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={toggleDashboards}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    justify-between
-                    px-4
-                    py-3
-                    text-sm
-                    text-slate-700
-                    hover:bg-slate-50
-                    transition-colors
-                  "
-                >
+              <button
+                type="button"
+                onClick={() => setShowMobileMenu(false)}
+                className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-                  <span className="flex items-center gap-3">
+            {/* Mobile Navigation */}
+            <nav className="p-4 space-y-1 overflow-y-auto">
+              {vetMenu.map((item) => {
+                const Icon = item.icon;
 
-                    <LayoutDashboard className="w-4 h-4 text-slate-600" />
-
-                    <span>
-                      Switch Dashboard
-                    </span>
-
-                  </span>
-
-                  <ChevronDown
-                    className={`
-                      w-4
-                      h-4
-                      text-slate-500
-                      transition-transform
-                      duration-200
-                      ${
-                        showDashboards
-                          ? "rotate-180"
-                          : ""
-                      }
-                    `}
-                  />
-
-                </button>
-
-                {/* ================================================= */}
-                {/* DASHBOARD OPTIONS */}
-                {/* ================================================= */}
-
-                {showDashboards && (
-                  <div
-                    className="
-                      mx-3
-                      mb-2
-                      rounded-lg
-                      bg-slate-50
-                      border
-                      border-slate-100
-                      p-1
-                    "
+                return (
+                  <NavLink
+                    key={item.title}
+                    to={item.path}
+                    onClick={() => setShowMobileMenu(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-lg text-[13px] ${
+                        isActive
+                          ? "bg-blue-50 text-blue-600 font-semibold"
+                          : "text-slate-600 hover:bg-slate-50"
+                      }`
+                    }
                   >
+                    <Icon className="w-[18px] h-[18px]" />
+                    {item.title}
+                  </NavLink>
+                );
+              })}
+            </nav>
+          </aside>
+        </>
+      )}
 
-                    {/* ADMIN */}
+      {/* ================= MAIN AREA ================= */}
+      <div className="md:pl-64 min-h-screen">
 
-                    {/* ADMIN */}
-<button
-  type="button"
-  onClick={() => switchDashboard("/admin")}
-  className="
-    w-full
-    flex
-    items-center
-    gap-3
-    px-3
-    py-3
-    rounded-md
-    text-sm
-    text-slate-700
-    hover:bg-white
-    hover:text-blue-600
-    transition-colors
-  "
->
-  <span className="text-base">
-    👑
-  </span>
+        {/* ================= TOP HEADER ================= */}
+        <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-30">
 
-  <span>
-    Admin Dashboard
-  </span>
-</button>
+          <div className="h-full px-4 sm:px-6 md:px-8 flex items-center justify-between">
 
-                    {/* VETERINARIAN */}
+            {/* Mobile Menu */}
+            <button
+              type="button"
+              onClick={() => setShowMobileMenu(true)}
+              className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        switchDashboard("/veterinarian")
-                      }
-                      className="
-                        w-full
-                        flex
-                        items-center
-                        gap-3
-                        px-3
-                        py-3
-                        rounded-md
-                        text-sm
-                        text-slate-700
-                        hover:bg-white
-                        hover:text-blue-600
-                        transition-colors
-                      "
-                    >
+            {/* Desktop Header Title */}
+            <div className="hidden md:block">
+              <p className="text-xs text-slate-400">
+                Veterinary Portal
+              </p>
 
-                      <Stethoscope className="w-4 h-4 text-blue-600" />
+              <p className="text-sm font-semibold text-slate-700">
+                PawSync Healthcare Network
+              </p>
+            </div>
 
-                      <span>
-                        Veterinarian Dashboard
-                      </span>
+            {/* Profile */}
+            <div className="relative">
 
-                    </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowProfile((value) => !value);
+                  setShowDashboards(false);
+                }}
+                className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+              >
 
-                    {/* PET OWNER */}
+                {/* Avatar */}
+                <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center">
+                  <User className="w-4 h-4 text-blue-600" />
+                </div>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        switchDashboard("/dashboard")
-                      }
-                      className="
-                        w-full
-                        flex
-                        items-center
-                        gap-3
-                        px-3
-                        py-3
-                        rounded-md
-                        text-sm
-                        text-slate-700
-                        hover:bg-white
-                        hover:text-blue-600
-                        transition-colors
-                      "
-                    >
+                {/* Name */}
+                <div className="hidden sm:block text-left">
+                  <p className="text-[13px] font-semibold text-slate-700 leading-tight">
+                    {displayName}
+                  </p>
 
-                      <span className="text-base">
-                        🐾
-                      </span>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Veterinarian
+                  </p>
+                </div>
 
-                      <span>
-                        Pet Owner Dashboard
-                      </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-slate-400 transition-transform ${
+                    showProfile ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
 
-                    </button>
+              {/* ================= PROFILE DROPDOWN ================= */}
+              {showProfile && (
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-[100]">
+
+                  {/* User Info */}
+                  <div className="px-4 py-4 border-b border-slate-100">
+
+                    <div className="flex items-center gap-3">
+
+                      <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center">
+                        <User className="w-5 h-5 text-blue-600" />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-800 truncate">
+                          {displayName}
+                        </p>
+
+                        <p className="text-xs text-slate-400 truncate mt-0.5">
+                          {user?.email || "Veterinarian"}
+                        </p>
+                      </div>
+
+                    </div>
 
                   </div>
-                )}
 
-                {/* ================================================= */}
-                {/* PROFILE */}
-                {/* ================================================= */}
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowProfile(false);
-                    setShowDashboards(false);
-                    navigate("/veterinarian/profile");
-                  }}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    gap-3
-                    px-4
-                    py-3
-                    text-sm
-                    text-slate-700
-                    hover:bg-slate-50
-                    transition-colors
-                  "
-                >
-
-                  <User className="w-4 h-4" />
-
-                  <span>
+                  {/* Profile */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      switchDashboard("/veterinarian/profile")
+                    }
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[13px] text-slate-600 hover:bg-slate-50 border-t border-slate-100"
+                  >
+                    <User className="w-4 h-4 text-slate-400" />
                     Profile
-                  </span>
+                  </button>
 
-                </button>
-
-                {/* ================================================= */}
-                {/* LOGOUT */}
-                {/* ================================================= */}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowProfile(false);
-                    setShowDashboards(false);
-                    navigate("/");
-                  }}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    gap-3
-                    px-4
-                    py-3
-                    text-sm
-                    text-red-600
-                    hover:bg-red-50
-                    transition-colors
-                  "
-                >
-
-                  <LogOut className="w-4 h-4" />
-
-                  <span>
+                  {/* Logout */}
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[13px] text-red-600 hover:bg-red-50 border-t border-slate-100"
+                  >
+                    <LogOut className="w-4 h-4" />
                     Logout
-                  </span>
+                  </button>
 
-                </button>
-
-              </div>
-            )}
-
+                </div>
+              )}
+            </div>
           </div>
-
         </header>
 
-        {/* ================================================= */}
-        {/* PAGE CONTENT */}
-        {/* ================================================= */}
-
+        {/* ================= PAGE CONTENT ================= */}
         <main className="p-4 sm:p-6 md:p-8">
           {children}
         </main>
 
       </div>
-
     </div>
   );
 }

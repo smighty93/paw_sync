@@ -1,46 +1,167 @@
-import PetCard from "./PetCard";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
 
 function MyPets() {
+  const [pets, setPets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadPets();
+  }, []);
+
+  async function loadPets() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        throw userError;
+      }
+
+      if (!user) {
+        setPets([]);
+        return;
+      }
+
+      const { data, error: petsError } = await supabase
+        .from("pets")
+        .select("*")
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      if (petsError) {
+        throw petsError;
+      }
+
+      setPets(data || []);
+    } catch (err) {
+      console.error("Error loading pets:", err);
+      setError(err.message || "Failed to load pets.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="mt-10">
-
-      <div className="flex justify-between mb-5">
-
-        <h2 className="text-2xl font-bold">
+      <div className="flex justify-between items-center mb-5">
+        <h2 className="text-2xl font-bold text-slate-900">
           My Pets
         </h2>
 
-        <button className="text-blue-600 font-semibold">
+        <Link
+          to="/pets"
+          className="text-blue-600 font-semibold hover:text-blue-700"
+        >
           View All
-        </button>
-
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      {loading && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+          <p className="text-slate-500">
+            Loading your pets...
+          </p>
+        </div>
+      )}
 
-        <PetCard
-          image="https://images.unsplash.com/photo-1558788353-f76d92427f16?w=800"
-          name="Bruno"
-          breed="Golden Retriever"
-          age="3 Years"
-        />
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+          <p className="text-red-600">
+            {error}
+          </p>
+        </div>
+      )}
 
-        <PetCard
-          image="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=800"
-          name="Luna"
-          breed="Persian Cat"
-          age="2 Years"
-        />
+      {!loading && !error && pets.length === 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+          <p className="text-slate-600">
+            You haven't added any pets yet.
+          </p>
 
-        <PetCard
-          image="https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=800"
-          name="Buddy"
-          breed="Rabbit"
-          age="1 Year"
-        />
+          <Link
+            to="/pets"
+            className="inline-block mt-4 text-blue-600 font-semibold hover:text-blue-700"
+          >
+            Add your first pet →
+          </Link>
+        </div>
+      )}
 
-      </div>
+      {!loading && !error && pets.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {pets.map((pet) => (
+            <div
+              key={pet.id}
+              className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">
+                    {pet.name}
+                  </h3>
 
+                  <p className="text-slate-500 mt-1">
+                    {pet.species || "Pet"}
+                    {pet.breed ? ` • ${pet.breed}` : ""}
+                  </p>
+                </div>
+
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-2xl">
+                  🐾
+                </div>
+              </div>
+
+              <div className="mt-5 space-y-3 text-sm">
+                {pet.gender && (
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                    <span className="text-slate-500">
+                      Gender
+                    </span>
+
+                    <span className="font-semibold text-slate-700">
+                      {pet.gender}
+                    </span>
+                  </div>
+                )}
+
+                {pet.date_of_birth && (
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                    <span className="text-slate-500">
+                      Date of Birth
+                    </span>
+
+                    <span className="font-semibold text-slate-700">
+                      {pet.date_of_birth}
+                    </span>
+                  </div>
+                )}
+
+                {pet.weight !== null &&
+                  pet.weight !== undefined && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">
+                        Weight
+                      </span>
+
+                      <span className="font-semibold text-slate-700">
+                        {pet.weight}
+                      </span>
+                    </div>
+                  )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

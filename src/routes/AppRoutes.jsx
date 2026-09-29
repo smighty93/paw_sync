@@ -1,14 +1,21 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
-// Auth
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 
-// Owner
 import OwnerMobileDashboard from "../pages/owner/OwnerMobileDashboard";
 import OwnerDashboard from "../pages/owner/Dashboard";
 
-// Veterinarian
+import Pets from "../pages/owner/Pets";
+import Appointments from "../pages/owner/Appointments";
+import MedicalRecords from "../pages/owner/MedicalRecords";
+import Profile from "../pages/owner/Profile";
+
 import VaccinationsMobile from "../pages/veterinarian/VaccinationsMobile";
 import TodaysAppointmentsMobile from "../pages/veterinarian/TodaysAppointmentsMobile";
 import VeterinarianProfileMobile from "../pages/veterinarian/VeterinarianProfileMobile";
@@ -17,16 +24,16 @@ import PatientRecordsMobile from "../pages/veterinarian/PatientRecordsMobile";
 import MedicalReportsMobile from "../pages/veterinarian/MedicalReportsMobile";
 import AppointmentsMobile from "../pages/veterinarian/AppointmentsMobile";
 import VetMobileDashboard from "../pages/veterinarian/VetMobileDashboard";
+
 import VeterinarianDashboard from "../pages/veterinarian/Dashboard";
-import Appointments from "../pages/veterinarian/Appointments";
-import MedicalReports from "../pages/veterinarian/MedicalReports";
-import PatientRecords from "../pages/veterinarian/PatientRecords";
-import Prescriptions from "../pages/veterinarian/Prescriptions";
-import TodaysAppointments from "../pages/veterinarian/TodaysAppointments";
-import Vaccinations from "../pages/veterinarian/Vaccinations";
+import VeterinarianAppointments from "../pages/veterinarian/Appointments";
+import VeterinarianMedicalReports from "../pages/veterinarian/MedicalReports";
+import VeterinarianPatientRecords from "../pages/veterinarian/PatientRecords";
+import VeterinarianPrescriptions from "../pages/veterinarian/Prescriptions";
+import VeterinarianTodaysAppointments from "../pages/veterinarian/TodaysAppointments";
+import VeterinarianVaccinations from "../pages/veterinarian/Vaccinations";
 import VeterinarianProfile from "../pages/veterinarian/VeterinarianProfile";
 
-// Admin
 import SettingsMobile from "../pages/admin/SettingsMobile";
 import ReportsMobile from "../pages/admin/ReportsMobile";
 import ProfileMobile from "../pages/admin/ProfileMobile";
@@ -36,6 +43,7 @@ import ManageUsersMobile from "../pages/admin/ManageUsersMobile";
 import ManagePetsMobile from "../pages/admin/ManagePetsMobile";
 import AnalyticsMobile from "../pages/admin/AnalyticsMobile";
 import AdminMobileDashboard from "../pages/admin/AdminMobileDashboard";
+
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import ManageUsers from "../pages/admin/ManageUsers";
 import ManagePets from "../pages/admin/ManagePets";
@@ -46,320 +54,346 @@ import Notifications from "../pages/admin/Notifications";
 import Settings from "../pages/admin/Settings";
 import AdminProfile from "../pages/admin/Profile";
 
+import { useAuth } from "../context/AuthContext";
+
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="text-center">
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
+
+        <p className="mt-4 text-sm text-slate-500">
+          Loading PawSync...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
+function ResponsivePage({ desktop, mobile }) {
+  return (
+    <>
+      <div className="hidden lg:block">
+        {desktop}
+      </div>
+
+      <div className="block lg:hidden">
+        {mobile}
+      </div>
+    </>
+  );
+}
+
 function AppRoutes() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* ================= AUTH ================= */}
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* ================= PET OWNER ================= */}
         <Route
-  path="/dashboard"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <OwnerDashboard />
-      </div>
+          path="/"
+          element={
+            user ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Login />
+            )
+          }
+        />
 
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <OwnerMobileDashboard />
-      </div>
-    </>
-  } />
-
-        {/* ================= VETERINARIAN ================= */}
         <Route
-  path="/veterinarian"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <VeterinarianDashboard  />
-      </div>
+          path="/register"
+          element={
+            user ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Register />
+            )
+          }
+        />
 
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <VetMobileDashboard />
-      </div>
-    </>
+        {/* OWNER DASHBOARD */}
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<OwnerDashboard />}
+                mobile={<OwnerMobileDashboard />}
+              />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+  path="/pets"
+  element={
+    <ProtectedRoute>
+      <Pets />
+    </ProtectedRoute>
   }
 />
 
-        <Route
-  path="/veterinarian/appointments"
+<Route
+  path="/appointments"
   element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <Appointments />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <AppointmentsMobile />
-      </div>
-    </>
+    <ProtectedRoute>
+      <Appointments />
+    </ProtectedRoute>
   }
 />
 
-        <Route
-  path="/veterinarian/medical-reports"
+<Route
+  path="/medical-records"
   element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <MedicalReports />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <MedicalReportsMobile />
-      </div>
-    </>
+    <ProtectedRoute>
+      <MedicalRecords />
+    </ProtectedRoute>
   }
 />
 
-        <Route
-  path="/veterinarian/patient-records"
+<Route
+  path="/profile"
   element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <PatientRecords />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <PatientRecordsMobile />
-      </div>
-    </>
+    <ProtectedRoute>
+      <Profile />
+    </ProtectedRoute>
   }
 />
 
-        <Route
-  path="/veterinarian/prescriptions"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <Prescriptions />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <PrescriptionsMobile />
-      </div>
-    </>
-  }
-/>
+        {/* VETERINARIAN */}
 
         <Route
-  path="/veterinarian/todays-appointments"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <TodaysAppointments />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <TodaysAppointmentsMobile />
-      </div>
-    </>
-  }
-/>
+          path="/veterinarian"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<VeterinarianDashboard />}
+                mobile={<VetMobileDashboard />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-  path="/veterinarian/vaccinations"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <Vaccinations />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <VaccinationsMobile />
-      </div>
-    </>
-  }
-/>
+          path="/veterinarian/appointments"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<VeterinarianAppointments />}
+                mobile={<AppointmentsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-  path="/veterinarian/profile"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <VeterinarianProfile />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <VeterinarianProfileMobile />
-      </div>
-    </>
-  }
-/>
-
-        {/* ================= ADMIN ================= */}
-        <Route
-  path="/admin"
-  element={
-    <>
-      <div className="hidden lg:block">
-        <AdminDashboard />
-      </div>
-
-      <div className="block lg:hidden">
-        <AdminMobileDashboard />
-      </div>
-    </>
-  }
-/>
+          path="/veterinarian/medical-reports"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<VeterinarianMedicalReports />}
+                mobile={<MedicalReportsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-  path="/admin/users"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <ManageUsers />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <ManageUsersMobile />
-      </div>
-    </>
-  }
-/>
+          path="/veterinarian/patient-records"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<VeterinarianPatientRecords />}
+                mobile={<PatientRecordsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-  path="/admin/pets"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <ManagePets />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <ManagePetsMobile />
-      </div>
-    </>
-  }
-/>
+          path="/veterinarian/prescriptions"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<VeterinarianPrescriptions />}
+                mobile={<PrescriptionsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-  path="/admin/veterinarians"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <ManageVeterinarians />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <ManageVeterinariansMobile />
-      </div>
-    </>
-  }
-/>
+          path="/veterinarian/todays-appointments"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<VeterinarianTodaysAppointments />}
+                mobile={<TodaysAppointmentsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-  path="/admin/reports"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <Reports />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <ReportsMobile />
-      </div>
-    </>
-  }
-/>
+          path="/veterinarian/vaccinations"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<VeterinarianVaccinations />}
+                mobile={<VaccinationsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-  path="/admin/analytics"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <Analytics />
-      </div>
+          path="/veterinarian/profile"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<VeterinarianProfile />}
+                mobile={<VeterinarianProfileMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <AnalyticsMobile />
-      </div>
-    </>
-  }
-/>
+        {/* ADMIN */}
 
         <Route
-  path="/admin/notifications"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <Notifications />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <NotificationsMobile />
-      </div>
-    </>
-  }
-/>
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<AdminDashboard />}
+                mobile={<AdminMobileDashboard />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-  path="/admin/settings"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <Settings />
-      </div>
-
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <SettingsMobile />
-      </div>
-    </>
-  }
-/>
+          path="/admin/users"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<ManageUsers />}
+                mobile={<ManageUsersMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
-  path="/admin/profile"
-  element={
-    <>
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <AdminProfile />
-      </div>
+          path="/admin/pets"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<ManagePets />}
+                mobile={<ManagePetsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Mobile */}
-      <div className="block lg:hidden">
-        <ProfileMobile />
-      </div>
-    </>
-  }
-/>
+        <Route
+          path="/admin/veterinarians"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<ManageVeterinarians />}
+                mobile={<ManageVeterinariansMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<Reports />}
+                mobile={<ReportsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<Analytics />}
+                mobile={<AnalyticsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/notifications"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<Notifications />}
+                mobile={<NotificationsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<Settings />}
+                mobile={<SettingsMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/profile"
+          element={
+            <ProtectedRoute>
+              <ResponsivePage
+                desktop={<AdminProfile />}
+                mobile={<ProfileMobile />}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* FALLBACK */}
+
+        <Route
+          path="*"
+          element={<Navigate to="/dashboard" replace />}
+        />
 
       </Routes>
     </BrowserRouter>

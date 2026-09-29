@@ -5,7 +5,6 @@ import {
   FileText,
   Pill,
   Syringe,
-  User,
 } from "lucide-react";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -41,11 +40,6 @@ const menuItems = [
     label: "Vaccinations",
     path: "/veterinarian/vaccinations",
   },
-  {
-    icon: User,
-    label: "Profile",
-    path: "/veterinarian/profile",
-  },
 ];
 
 function VetSidebar() {
@@ -53,30 +47,40 @@ function VetSidebar() {
   const location = useLocation();
 
   return (
-    <aside className="w-72 min-h-screen bg-white shadow-lg p-6 flex flex-col">
-      
-      <h1 className="text-3xl font-bold text-blue-600 mb-10">
-        🐾 PawSync
-      </h1>
+    <aside className="w-64 min-h-screen bg-white border-r border-slate-100 px-4 py-5 flex flex-col">
 
-      <nav className="space-y-3">
+      {/* Logo */}
+      <div className="px-3 mb-8">
+        <h1 className="text-2xl font-bold text-blue-600">
+          🐾 PawSync
+        </h1>
+      </div>
+
+      {/* Navigation */}
+      <nav className="space-y-1.5">
         {menuItems.map((item) => {
           const Icon = item.icon;
 
-          const isActive = location.pathname === item.path;
+          const isActive =
+            location.pathname === item.path;
 
           return (
             <button
               key={item.label}
+              type="button"
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
                 isActive
-                  ? "bg-blue-50 text-blue-600 font-semibold"
-                  : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  ? "bg-blue-50 text-blue-600 font-medium"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"
               }`}
             >
-              <Icon size={20} />
-              {item.label}
+              <Icon
+                size={18}
+                strokeWidth={isActive ? 2.2 : 1.8}
+              />
+
+              <span>{item.label}</span>
             </button>
           );
         })}

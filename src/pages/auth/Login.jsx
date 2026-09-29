@@ -1,820 +1,235 @@
-import pawSyncLogo from "../../assets/pawsync-logo.png";
-import happyPets from "../../assets/pets-login.png";
-
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Mail,
   Lock,
   Eye,
   EyeOff,
-  Check,
+  Loader2,
 } from "lucide-react";
 
-import { useNavigate } from "react-router-dom";
+import pawSyncLogo from "../../assets/pawsync-logo.png";
+import happyPets from "../../assets/pets-login.png";
+import { useAuth } from "../../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] =
+    useState(false);
+  const [rememberMe, setRememberMe] =
+    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const handleLogin = async (event) => {
+    event.preventDefault();
 
-    // Temporary navigation
-    navigate("/dashboard");
+    setError("");
+
+    if (!email.trim() || !password) {
+      setError("Please enter your email and password.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const data = await login(
+        email.trim(),
+        password
+      );
+
+      const userRole =
+        data?.user?.user_metadata?.role ||
+        "pet_owner";
+
+      if (userRole === "admin") {
+        navigate("/admin", { replace: true });
+      } else if (userRole === "veterinarian") {
+        navigate("/veterinarian", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    } catch (loginError) {
+      setError(
+        loginError?.message ||
+          "Unable to sign in. Please check your credentials."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen w-full bg-[#F5F8FF] flex flex-col lg:flex-row overflow-x-hidden">
-
-      {/* =====================================================
-          LEFT BRANDING SECTION
-          Visible only on large screens
-      ===================================================== */}
-
-      <div
-        className="
-          hidden
-          lg:flex
-          relative
-          w-full
-          lg:w-[55%]
-          min-h-screen
-          overflow-hidden
-          bg-[#F3F7FF]
-        "
-      >
-
-        {/* =================================================
-            DECORATIVE PAW PRINTS
-        ================================================= */}
-
-        <div
-          className="
-            absolute
-            top-[8%]
-            left-[5%]
-            text-[#D8E5FC]
-            text-5xl
-            opacity-70
-            rotate-[-17deg]
-            z-20
-            pointer-events-none
-          "
-        >
-          🐾
-        </div>
-
-        <div
-          className="
-            absolute
-            top-[10%]
-            right-[7%]
-            text-[#D8E5FC]
-            text-5xl
-            opacity-70
-            rotate-[15deg]
-            z-20
-            pointer-events-none
-          "
-        >
-          🐾
-        </div>
-
-        <div
-          className="
-            absolute
-            top-[25%]
-            right-[5%]
-            text-[#E1EBFF]
-            text-4xl
-            opacity-80
-            z-20
-            pointer-events-none
-          "
-        >
-          🐾
-        </div>
-
-        <div
-          className="
-            absolute
-            bottom-[20%]
-            left-[3%]
-            text-[#D8E5FC]
-            text-4xl
-            opacity-70
-            rotate-[-10deg]
-            z-20
-            pointer-events-none
-          "
-        >
-          🐾
-        </div>
-
-
-        {/* =================================================
-            BRANDING
-        ================================================= */}
-
-        <div
-          className="
-            relative
-            z-30
-            w-full
-            px-[6%]
-            pt-[6%]
-          "
-        >
-
-          <div className="flex items-start gap-[clamp(1rem,2vw,1.5rem)]">
-
-            {/* PAW LOGO */}
-
+      <div className="hidden lg:flex relative w-full lg:w-[55%] min-h-screen overflow-hidden bg-[#F3F7FF]">
+        <div className="relative z-30 w-full px-[6%] pt-[6%]">
+          <div className="flex items-start gap-6">
             <img
               src={pawSyncLogo}
               alt="PawSync Logo"
-              className="
-                w-[clamp(5rem,9vw,8.75rem)]
-                h-[clamp(5rem,9vw,8.75rem)]
-                object-contain
-                shrink-0
-              "
+              className="w-28 h-28 object-contain shrink-0"
             />
 
-
-            {/* BRAND TEXT */}
-
-            <div className="pt-[clamp(0.5rem,1vw,1rem)] min-w-0">
-
-              <h1
-                className="
-                  text-[clamp(3rem,7vw,7.5rem)]
-                  leading-none
-                  font-extrabold
-                  tracking-[-0.08em]
-                  text-[#164BC5]
-                  whitespace-nowrap
-                "
-              >
+            <div className="pt-4">
+              <h1 className="text-7xl leading-none font-extrabold tracking-tight text-[#164BC5]">
                 PawSync
               </h1>
 
-              <p
-                className="
-                  mt-3
-                  ml-[clamp(0rem,1vw,1.25rem)]
-                  text-[clamp(1rem,1.7vw,2.05rem)]
-                  leading-[1.35]
-                  font-medium
-                  text-[#536687]
-                  max-w-[clamp(18rem,35vw,31rem)]
-                "
-              >
+              <p className="mt-3 text-2xl leading-relaxed font-medium text-[#536687]">
                 Smart Pet Healthcare &amp; Medical
                 <br />
-                <span className="ml-[clamp(2rem,5vw,7.5rem)]">
-                  Record System
-                </span>
+                Record System
               </p>
-
             </div>
-
           </div>
-
         </div>
 
-
-        {/* =================================================
-            PET IMAGE
-        ================================================= */}
-
-        <div
-          className="
-            absolute
-            left-[-3%]
-            bottom-0
-            w-[106%]
-            h-[68%]
-            min-h-[20rem]
-            z-10
-          "
-        >
-
+        <div className="absolute left-0 bottom-0 w-full h-[65%]">
           <img
             src={happyPets}
             alt="Happy dog and cat"
-            className="
-              absolute
-              inset-0
-              w-full
-              h-full
-              object-cover
-              object-center
-            "
+            className="w-full h-full object-cover object-center"
           />
-
-
-          {/* TOP BLEND */}
-
-          <div
-            className="
-              absolute
-              top-0
-              left-0
-              right-0
-              h-[8%]
-              bg-gradient-to-b
-              from-[#F3F7FF]
-              via-[#F3F7FF]/45
-              to-transparent
-              pointer-events-none
-            "
-          />
-
-
-          {/* LEFT BLEND */}
-
-          <div
-            className="
-              absolute
-              top-0
-              bottom-0
-              left-0
-              w-[14%]
-              bg-gradient-to-r
-              from-[#F3F7FF]
-              via-[#F3F7FF]/25
-              to-transparent
-              pointer-events-none
-            "
-          />
-
-
-          {/* RIGHT BLEND */}
-
-          <div
-            className="
-              absolute
-              top-0
-              bottom-0
-              right-0
-              w-[14%]
-              bg-gradient-to-l
-              from-[#F3F7FF]
-              via-[#F3F7FF]/20
-              to-transparent
-              pointer-events-none
-            "
-          />
-
-
-          {/* BOTTOM BLEND */}
-
-          <div
-            className="
-              absolute
-              bottom-0
-              left-0
-              right-0
-              h-[10%]
-              bg-gradient-to-t
-              from-[#F3F7FF]/70
-              to-transparent
-              pointer-events-none
-            "
-          />
-
         </div>
-
-
-        {/* =================================================
-            LIGHT BLUE CURVE
-        ================================================= */}
-
-        <div
-          className="
-            absolute
-            z-[19]
-            bottom-[-6rem]
-            left-[-12%]
-            w-[125%]
-            h-[9rem]
-            bg-[#D9E7FF]
-            rounded-[50%]
-          "
-        />
-
-
-        {/* =================================================
-            BLUE CURVE
-        ================================================= */}
-
-        <div
-          className="
-            absolute
-            z-20
-            bottom-[-7.5rem]
-            left-[-12%]
-            w-[125%]
-            h-[11rem]
-            bg-[#2875E8]
-            rounded-[50%]
-          "
-        />
-
       </div>
 
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-8">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 sm:p-8">
+          <div className="lg:hidden flex justify-center mb-6">
+            <img
+              src={pawSyncLogo}
+              alt="PawSync"
+              className="w-20 h-20 object-contain"
+            />
+          </div>
 
-      {/* =====================================================
-          RIGHT LOGIN SECTION
-      ===================================================== */}
+          <h2 className="text-3xl font-bold text-slate-900">
+            Welcome Back 🐾
+          </h2>
 
-      <div
-        className="
-          w-full
-          lg:w-[45%]
-          min-h-screen
-          flex
-          items-center
-          justify-center
-          px-4
-          sm:px-6
-          lg:px-[4%]
-          py-6
-          sm:py-8
-          lg:py-6
-          bg-[#F7F9FD]
-        "
-      >
+          <p className="text-slate-500 mt-2 mb-8">
+            Sign in to continue to PawSync.
+          </p>
 
-        <div className="w-full max-w-[35rem]">
+          {error && (
+            <div className="mb-5 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-          {/* =================================================
-              LOGIN CARD
-          ================================================= */}
-
-          <div
-            className="
-              w-full
-              bg-white
-              rounded-[clamp(1.25rem,2vw,1.75rem)]
-              px-[clamp(1.25rem,4vw,2.25rem)]
-              py-[clamp(1.5rem,4vw,2rem)]
-              shadow-[0_20px_60px_rgba(45,75,130,0.12)]
-              border
-              border-white
-            "
+          <form
+            onSubmit={handleLogin}
+            className="space-y-5"
           >
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Email
+              </label>
 
-            {/* =================================================
-                HEADING
-            ================================================= */}
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
 
-            <div className="mb-[clamp(1.25rem,3vw,1.5rem)]">
-
-              <h2
-                className="
-                  text-[clamp(1.75rem,4vw,2.375rem)]
-                  leading-tight
-                  font-bold
-                  text-[#17233C]
-                "
-              >
-                Welcome 👋
-              </h2>
-
-              <p
-                className="
-                  mt-2
-                  text-[clamp(0.9rem,2vw,1.0625rem)]
-                  text-[#71809A]
-                "
-              >
-                Login to continue managing your pets.
-              </p>
-
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) =>
+                    setEmail(event.target.value)
+                  }
+                  placeholder="Enter your email"
+                  autoComplete="email"
+                  className="w-full rounded-xl border border-slate-300 pl-12 pr-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Password
+              </label>
 
-            {/* =================================================
-                FORM
-            ================================================= */}
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
 
-            <form onSubmit={handleLogin}>
-
-              {/* EMAIL */}
-
-              <div className="mb-5">
-
-                <label
-                  className="
-                    block
-                    mb-2
-                    text-sm
-                    sm:text-[15px]
-                    font-semibold
-                    text-[#34425B]
-                  "
-                >
-                  Email
-                </label>
-
-                <div className="relative">
-
-                  <Mail
-                    size={21}
-                    strokeWidth={1.8}
-                    className="
-                      absolute
-                      left-4
-                      sm:left-5
-                      top-1/2
-                      -translate-y-1/2
-                      text-[#7C8BA5]
-                    "
-                  />
-
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    required
-                    className="
-                      w-full
-                      min-h-[3.25rem]
-                      sm:min-h-[3.5rem]
-                      pl-12
-                      sm:pl-[54px]
-                      pr-4
-                      sm:pr-5
-                      rounded-[13px]
-                      border
-                      border-[#D4DDEB]
-                      bg-white
-                      outline-none
-                      text-sm
-                      sm:text-base
-                      text-[#17233C]
-                      placeholder-[#9AA6B8]
-                      transition-all
-                      focus:border-[#2166E8]
-                      focus:ring-4
-                      focus:ring-[#2166E8]/10
-                    "
-                  />
-
-                </div>
-
-              </div>
-
-
-              {/* PASSWORD */}
-
-              <div className="mb-4">
-
-                <label
-                  className="
-                    block
-                    mb-2
-                    text-sm
-                    sm:text-[15px]
-                    font-semibold
-                    text-[#34425B]
-                  "
-                >
-                  Password
-                </label>
-
-                <div className="relative">
-
-                  <Lock
-                    size={21}
-                    strokeWidth={1.8}
-                    className="
-                      absolute
-                      left-4
-                      sm:left-5
-                      top-1/2
-                      -translate-y-1/2
-                      text-[#7C8BA5]
-                    "
-                  />
-
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    required
-                    className="
-                      w-full
-                      min-h-[3.25rem]
-                      sm:min-h-[3.5rem]
-                      pl-12
-                      sm:pl-[54px]
-                      pr-12
-                      sm:pr-[54px]
-                      rounded-[13px]
-                      border
-                      border-[#D4DDEB]
-                      bg-white
-                      outline-none
-                      text-sm
-                      sm:text-base
-                      text-[#17233C]
-                      placeholder-[#9AA6B8]
-                      transition-all
-                      focus:border-[#2166E8]
-                      focus:ring-4
-                      focus:ring-[#2166E8]/10
-                    "
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowPassword(!showPassword)
-                    }
-                    className="
-                      absolute
-                      right-4
-                      sm:right-5
-                      top-1/2
-                      -translate-y-1/2
-                      text-[#7C8BA5]
-                      hover:text-[#2166E8]
-                      transition
-                    "
-                  >
-
-                    {showPassword ? (
-                      <EyeOff size={21} />
-                    ) : (
-                      <Eye size={21} />
-                    )}
-
-                  </button>
-
-                </div>
-
-              </div>
-
-
-              {/* =================================================
-                  REMEMBER + FORGOT PASSWORD
-              ================================================= */}
-
-              <div
-                className="
-                  flex
-                  flex-col
-                  min-[400px]:flex-row
-                  min-[400px]:items-center
-                  min-[400px]:justify-between
-                  gap-3
-                  mb-6
-                "
-              >
-
-                <label
-                  className="
-                    flex
-                    items-center
-                    gap-2.5
-                    cursor-pointer
-                    text-[#596A84]
-                  "
-                >
-
-                  <div className="relative shrink-0">
-
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) =>
-                        setRememberMe(e.target.checked)
-                      }
-                      className="
-                        appearance-none
-                        w-5
-                        h-5
-                        rounded-[5px]
-                        border
-                        border-[#B9C5D7]
-                        checked:bg-[#2166E8]
-                        checked:border-[#2166E8]
-                        cursor-pointer
-                      "
-                    />
-
-                    {rememberMe && (
-                      <Check
-                        size={14}
-                        className="
-                          absolute
-                          left-[3px]
-                          top-[3px]
-                          text-white
-                          pointer-events-none
-                        "
-                      />
-                    )}
-
-                  </div>
-
-                  <span className="text-sm font-medium">
-                    Remember me
-                  </span>
-
-                </label>
-
+                <input
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
+                  value={password}
+                  onChange={(event) =>
+                    setPassword(event.target.value)
+                  }
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  className="w-full rounded-xl border border-slate-300 pl-12 pr-12 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
 
                 <button
                   type="button"
-                  className="
-                    text-left
-                    min-[400px]:text-right
-                    text-sm
-                    font-semibold
-                    text-[#2166E8]
-                    hover:underline
-                  "
+                  onClick={() =>
+                    setShowPassword(
+                      (value) => !value
+                    )
+                  }
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
-                  Forgot Password?
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
-
               </div>
-
-
-              {/* =================================================
-                  LOGIN BUTTON
-              ================================================= */}
-
-              <button
-                type="submit"
-                className="
-                  w-full
-                  min-h-[3.25rem]
-                  sm:min-h-[3.5rem]
-                  rounded-[13px]
-                  bg-[#2166E8]
-                  text-white
-                  text-base
-                  sm:text-[17px]
-                  font-semibold
-                  shadow-[0_8px_20px_rgba(33,102,232,0.25)]
-                  hover:bg-[#174FC5]
-                  hover:-translate-y-[1px]
-                  active:translate-y-0
-                  transition-all
-                "
-              >
-                Login
-              </button>
-
-            </form>
-
-
-            {/* =================================================
-                DIVIDER
-            ================================================= */}
-
-            <div
-              className="
-                flex
-                items-center
-                gap-3
-                sm:gap-4
-                my-5
-              "
-            >
-
-              <div className="flex-1 h-px bg-[#E1E6EF]" />
-
-              <span className="text-sm text-[#8490A4]">
-                OR
-              </span>
-
-              <div className="flex-1 h-px bg-[#E1E6EF]" />
-
             </div>
 
+            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) =>
+                  setRememberMe(
+                    event.target.checked
+                  )
+                }
+                className="w-4 h-4 rounded border-slate-300 text-blue-600"
+              />
 
-            {/* =================================================
-                GOOGLE
-            ================================================= */}
-
-            <button
-              type="button"
-              className="
-                w-full
-                min-h-[3.25rem]
-                sm:min-h-[3.375rem]
-                rounded-[13px]
-                border
-                border-[#D9E0EA]
-                bg-white
-                hover:bg-[#F8FAFD]
-                transition
-                flex
-                items-center
-                justify-center
-                gap-3
-                text-sm
-                sm:text-base
-                font-medium
-                text-[#26344D]
-              "
-            >
-
-              <span
-                className="
-                  text-xl
-                  font-bold
-                  text-[#4285F4]
-                "
-              >
-                G
-              </span>
-
-              Continue with Google
-
-            </button>
-
-
-            {/* =================================================
-                APPLE
-            ================================================= */}
+              Remember me
+            </label>
 
             <button
-              type="button"
-              className="
-                w-full
-                mt-3
-                min-h-[3.25rem]
-                sm:min-h-[3.375rem]
-                rounded-[13px]
-                border
-                border-[#D9E0EA]
-                bg-white
-                hover:bg-[#F8FAFD]
-                transition
-                flex
-                items-center
-                justify-center
-                gap-3
-                text-sm
-                sm:text-base
-                font-medium
-                text-[#26344D]
-              "
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl py-3 flex items-center justify-center gap-2 transition"
             >
+              {loading && (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              )}
 
-              <span className="text-lg">
-                ●
-              </span>
-
-              Continue with Apple
-
+              {loading
+                ? "Signing In..."
+                : "Sign In"}
             </button>
+          </form>
 
+          <p className="text-center text-slate-600 mt-7">
+            Don't have an account?
 
-            {/* =================================================
-                REGISTER
-            ================================================= */}
-
-            <p
-              className="
-                text-center
-                mt-6
-                text-sm
-                sm:text-[15px]
-                text-[#66758E]
-              "
+            <Link
+              to="/register"
+              className="text-blue-600 font-semibold ml-2 hover:underline"
             >
-
-              Don't have an account?
-
-              <button
-                type="button"
-                onClick={() => navigate("/register")}
-                className="
-                  ml-1
-                  font-semibold
-                  text-[#2166E8]
-                  hover:underline
-                "
-              >
-                Sign Up
-              </button>
-
-            </p>
-
-          </div>
-
+              Create Account
+            </Link>
+          </p>
         </div>
-
       </div>
-
     </div>
   );
 }
