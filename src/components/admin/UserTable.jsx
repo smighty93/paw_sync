@@ -3,7 +3,14 @@ import {
   Search,
   MoreVertical,
   CheckCircle,
+  XCircle,
   Loader2,
+  User,
+  Mail,
+  Phone,
+  BriefcaseMedical,
+  CalendarDays,
+  AlertTriangle,
 } from "lucide-react";
 
 import { supabase } from "../../lib/supabase";
@@ -18,6 +25,16 @@ export default function UserTable({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Action menu
+  const [openMenu, setOpenMenu] = useState(null);
+
+  // View details modal
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  // Termination modal
+  const [userToTerminate, setUserToTerminate] = useState(null);
+  const [terminating, setTerminating] = useState(false);
+
   useEffect(() => {
     loadUsers();
   }, [roleFilter, limit]);
@@ -30,7 +47,17 @@ export default function UserTable({
       let query = supabase
         .from("profiles")
         .select(
-          "id, full_name, email, role, created_at, phone, specialization, experience"
+          `
+          id,
+          full_name,
+          email,
+          role,
+          created_at,
+          phone,
+          specialization,
+          experience,
+          status
+        `
         )
         .order("created_at", {
           ascending: false,
@@ -40,13 +67,20 @@ export default function UserTable({
         query = query.eq("role", roleFilter);
       }
 
+      // Only show active users in the normal table
+      query = query.or(
+        "status.eq.active,status.is.null"
+      );
+
       if (limit) {
         query = query.limit(limit);
       }
 
-      const { data, error: fetchError } = await query;
+      const {
+        data,
+        error: fetchError,
+      } = await query;
 
-      // DEBUG: See exactly what Supabase is returning
       console.log("UserTable result:", {
         data,
         error: fetchError,
@@ -58,7 +92,10 @@ export default function UserTable({
 
       setUsers(data || []);
     } catch (fetchError) {
-      console.error("Error loading users:", fetchError);
+      console.error(
+        "Error loading users:",
+        fetchError
+      );
 
       setError(
         fetchError?.message ||
@@ -73,13 +110,19 @@ export default function UserTable({
     const name = user.full_name || "";
     const email = user.email || "";
     const role = user.role || "";
+    const specialization =
+      user.specialization || "";
 
-    const search = searchTerm.toLowerCase();
+    const search =
+      searchTerm.toLowerCase();
 
     return (
       name.toLowerCase().includes(search) ||
       email.toLowerCase().includes(search) ||
-      role.toLowerCase().includes(search)
+      role.toLowerCase().includes(search) ||
+      specialization
+        .toLowerCase()
+        .includes(search)
     );
   });
 
@@ -112,6 +155,61 @@ export default function UserTable({
         day: "2-digit",
       }
     );
+  }
+
+  function handleViewDetails(user) {
+    setOpenMenu(null);
+    setSelectedUser(user);
+  }
+
+  function handleTerminateClick(user) {
+    setOpenMenu(null);
+    setUserToTerminate(user);
+  }
+
+  async function terminateVeterinarian() {
+    if (!userToTerminate) return;
+
+    try {
+      setTerminating(true);
+      setError("");
+
+      const {
+        error: updateError,
+      } = await supabase
+        .from("profiles")
+        .update({
+          status: "terminated",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", userToTerminate.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Remove from current active list immediately
+      setUsers((currentUsers) =>
+        currentUsers.filter(
+          (user) =>
+            user.id !== userToTerminate.id
+        )
+      );
+
+      setUserToTerminate(null);
+    } catch (updateError) {
+      console.error(
+        "Error terminating veterinarian:",
+        updateError
+      );
+
+      setError(
+        updateError?.message ||
+          "Unable to terminate veterinarian."
+      );
+    } finally {
+      setTerminating(false);
+    }
   }
 
   return (
@@ -192,7 +290,8 @@ export default function UserTable({
 
               {filteredUsers.map((user) => {
                 const name =
-                  user.full_name || "Unnamed User";
+                  user.full_name ||
+                  "Unnamed User";
 
                 const initials = name
                   .split(" ")
@@ -225,7 +324,8 @@ export default function UserTable({
                           </p>
 
                           <p className="text-xs text-slate-400">
-                            {user.email || "No email"}
+                            {user.email ||
+                              "No email"}
                           </p>
                         </div>
 
@@ -238,14 +338,18 @@ export default function UserTable({
 
                       <div>
                         <p>
-                          {formatRole(user.role)}
+                          {formatRole(
+                            user.role
+                          )}
                         </p>
 
                         {user.role ===
                           "veterinarian" &&
                           user.specialization && (
                             <p className="text-xs text-slate-400 mt-1">
-                              {user.specialization}
+                              {
+                                user.specialization
+                              }
                             </p>
                           )}
                       </div>
@@ -267,18 +371,72 @@ export default function UserTable({
 
                     {/* Joined Date */}
                     <td className="px-6 py-4 text-slate-400">
-                      {formatDate(user.created_at)}
+                      {formatDate(
+                        user.created_at
+                      )}
                     </td>
 
                     {/* Actions */}
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right relative">
 
                       <button
                         type="button"
-                        className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600"
+                        onClick={() =>
+                          setOpenMenu(
+                            openMenu === user.id
+                              ? null
+                              : user.id
+                          )
+                        }
+                        className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-200"
+                        aria-label="Open actions"
                       >
                         <MoreVertical className="w-4 h-4" />
                       </button>
+
+                      {/* Dropdown */}
+                      {openMenu === user.id && (
+                        <div className="absolute right-6 top-12 z-30 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-1 text-left">
+
+                          {/* View Details */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleViewDetails(
+                                user
+                              )
+                            }
+                            className="w-full px-4 py-2.5 flex items-center gap-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                          >
+                            <User className="w-4 h-4 text-slate-400" />
+
+                            <span>
+                              View Details
+                            </span>
+                          </button>
+
+                          {/* Terminate */}
+                          {roleFilter ===
+                            "veterinarian" && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleTerminateClick(
+                                  user
+                                )
+                              }
+                              className="w-full px-4 py-2.5 flex items-center gap-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                              <XCircle className="w-4 h-4" />
+
+                              <span>
+                                Terminate from Job
+                              </span>
+                            </button>
+                          )}
+
+                        </div>
+                      )}
 
                     </td>
 
@@ -289,6 +447,281 @@ export default function UserTable({
             </tbody>
 
           </table>
+
+        </div>
+      )}
+
+      {/* =====================================================
+          VIEW DETAILS MODAL
+      ====================================================== */}
+
+      {selectedUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4"
+          onClick={() =>
+            setSelectedUser(null)
+          }
+        >
+
+          <div
+            className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            {/* Modal Header */}
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Veterinarian Details
+                </h3>
+
+                <p className="text-sm text-slate-400 mt-1">
+                  Professional information
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedUser(null)
+                }
+                className="text-slate-400 hover:text-slate-700 text-xl"
+              >
+                ×
+              </button>
+
+            </div>
+
+            {/* Details */}
+            <div className="p-6 space-y-5">
+
+              {/* Name */}
+              <div className="flex items-center gap-4">
+
+                <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-700 font-semibold flex items-center justify-center">
+                  {(
+                    selectedUser.full_name ||
+                    "U"
+                  )
+                    .split(" ")
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((part) =>
+                      part.charAt(0)
+                    )
+                    .join("")
+                    .toUpperCase()}
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-slate-900">
+                    {selectedUser.full_name ||
+                      "Unnamed User"}
+                  </h4>
+
+                  <p className="text-sm text-slate-400">
+                    {formatRole(
+                      selectedUser.role
+                    )}
+                  </p>
+                </div>
+
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                {/* Email */}
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <div className="flex items-center gap-2 text-slate-400 mb-1">
+                    <Mail className="w-4 h-4" />
+                    <span className="text-xs">
+                      Email
+                    </span>
+                  </div>
+
+                  <p className="text-sm font-medium text-slate-800 break-all">
+                    {selectedUser.email ||
+                      "-"}
+                  </p>
+                </div>
+
+                {/* Phone */}
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <div className="flex items-center gap-2 text-slate-400 mb-1">
+                    <Phone className="w-4 h-4" />
+                    <span className="text-xs">
+                      Phone
+                    </span>
+                  </div>
+
+                  <p className="text-sm font-medium text-slate-800">
+                    {selectedUser.phone ||
+                      "-"}
+                  </p>
+                </div>
+
+                {/* Specialization */}
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <div className="flex items-center gap-2 text-slate-400 mb-1">
+                    <BriefcaseMedical className="w-4 h-4" />
+                    <span className="text-xs">
+                      Specialization
+                    </span>
+                  </div>
+
+                  <p className="text-sm font-medium text-slate-800">
+                    {selectedUser.specialization ||
+                      "Not specified"}
+                  </p>
+                </div>
+
+                {/* Experience */}
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <div className="flex items-center gap-2 text-slate-400 mb-1">
+                    <BriefcaseMedical className="w-4 h-4" />
+                    <span className="text-xs">
+                      Experience
+                    </span>
+                  </div>
+
+                  <p className="text-sm font-medium text-slate-800">
+                    {selectedUser.experience !==
+                      null &&
+                    selectedUser.experience !==
+                      undefined &&
+                    selectedUser.experience !==
+                      ""
+                      ? `${selectedUser.experience} years`
+                      : "Not specified"}
+                  </p>
+                </div>
+
+                {/* Joined */}
+                <div className="rounded-lg bg-slate-50 p-4 sm:col-span-2">
+                  <div className="flex items-center gap-2 text-slate-400 mb-1">
+                    <CalendarDays className="w-4 h-4" />
+                    <span className="text-xs">
+                      Joined
+                    </span>
+                  </div>
+
+                  <p className="text-sm font-medium text-slate-800">
+                    {formatDate(
+                      selectedUser.created_at
+                    )}
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedUser(null)
+                }
+                className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+              >
+                Close
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* =====================================================
+          TERMINATE CONFIRMATION MODAL
+      ====================================================== */}
+
+      {userToTerminate && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4"
+          onClick={() =>
+            !terminating &&
+            setUserToTerminate(null)
+          }
+        >
+
+          <div
+            className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <div className="p-6">
+
+              {/* Warning Icon */}
+              <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+
+              <h3 className="text-lg font-semibold text-slate-900">
+                Terminate Veterinarian?
+              </h3>
+
+              <p className="text-sm text-slate-500 mt-2 leading-6">
+                You are about to terminate{" "}
+                <span className="font-semibold text-slate-800">
+                  {userToTerminate.full_name}
+                </span>{" "}
+                from the veterinary team.
+              </p>
+
+              <p className="text-sm text-slate-500 mt-2 leading-6">
+                Their account and historical records
+                will remain in the system, but they
+                will no longer appear as an active
+                veterinarian.
+              </p>
+
+            </div>
+
+            {/* Buttons */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+
+              <button
+                type="button"
+                disabled={terminating}
+                onClick={() =>
+                  setUserToTerminate(null)
+                }
+                className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={terminating}
+                onClick={
+                  terminateVeterinarian
+                }
+                className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+
+                {terminating && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+
+                {terminating
+                  ? "Terminating..."
+                  : "Terminate"}
+              </button>
+
+            </div>
+
+          </div>
 
         </div>
       )}
