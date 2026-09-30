@@ -29,7 +29,6 @@ function AppointmentTable() {
         throw new Error("You are not logged in.");
       }
 
-      // Get today's date range in the user's local timezone.
       const now = new Date();
 
       const startOfDay = new Date(
@@ -60,7 +59,6 @@ function AppointmentTable() {
         .select(`
           id,
           pet_id,
-          veterinarian_id,
           appointment_date,
           status,
           reason,
@@ -72,7 +70,6 @@ function AppointmentTable() {
             owner_id
           )
         `)
-        .eq("veterinarian_id", user.id)
         .gte(
           "appointment_date",
           startOfDay.toISOString()
@@ -91,7 +88,6 @@ function AppointmentTable() {
 
       const appointmentData = data || [];
 
-      // Get owner IDs from the pets.
       const ownerIds = [
         ...new Set(
           appointmentData
@@ -217,18 +213,16 @@ function AppointmentTable() {
         </h2>
 
         <p className="mt-1 text-sm text-gray-500">
-          Appointments scheduled with you today.
+          Appointments scheduled across the PawSync healthcare network today.
         </p>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      {/* Loading */}
       {loading ? (
         <div className="py-10 text-center">
           <p className="text-gray-500">
@@ -242,8 +236,7 @@ function AppointmentTable() {
           </h3>
 
           <p className="mt-1 text-sm text-slate-500">
-            You do not have any appointments scheduled
-            for today.
+            There are no appointments scheduled for today.
           </p>
         </div>
       ) : (
@@ -251,25 +244,11 @@ function AppointmentTable() {
           <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b text-left text-gray-500">
-                <th className="pb-3">
-                  Pet
-                </th>
-
-                <th className="pb-3">
-                  Owner
-                </th>
-
-                <th className="pb-3">
-                  Time
-                </th>
-
-                <th className="pb-3">
-                  Reason
-                </th>
-
-                <th className="pb-3">
-                  Status
-                </th>
+                <th className="pb-3">Pet</th>
+                <th className="pb-3">Owner</th>
+                <th className="pb-3">Time</th>
+                <th className="pb-3">Reason</th>
+                <th className="pb-3">Status</th>
               </tr>
             </thead>
 
@@ -279,15 +258,13 @@ function AppointmentTable() {
                   key={appointment.id}
                   className="border-b last:border-none hover:bg-gray-50"
                 >
-                  {/* Pet */}
                   <td className="py-4">
                     <p className="font-medium text-slate-800">
                       {appointment.petName}
                     </p>
 
                     <p className="mt-1 text-xs text-slate-500">
-                      {appointment.pets?.species ||
-                        ""}
+                      {appointment.pets?.species || ""}
 
                       {appointment.pets?.breed
                         ? ` • ${appointment.pets.breed}`
@@ -295,24 +272,20 @@ function AppointmentTable() {
                     </p>
                   </td>
 
-                  {/* Owner */}
                   <td className="text-slate-600">
                     {appointment.ownerName}
                   </td>
 
-                  {/* Time */}
                   <td className="font-medium text-slate-700">
                     {formatTime(
                       appointment.appointment_date
                     )}
                   </td>
 
-                  {/* Reason */}
                   <td className="max-w-xs text-slate-600">
                     {appointment.reason || "—"}
                   </td>
 
-                  {/* Status */}
                   <td>
                     <span
                       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClass(

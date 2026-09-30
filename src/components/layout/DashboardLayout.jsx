@@ -9,7 +9,6 @@ import {
   Bell,
   User,
   ChevronDown,
-  Stethoscope,
   LogOut,
   Menu,
   X,
@@ -59,47 +58,87 @@ export default function DashboardLayout({
   children,
 }) {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+
+  const {
+    user,
+    profile,
+    signOut,
+  } = useAuth();
 
   const [showProfile, setShowProfile] =
     useState(false);
-  const [showDashboards, setShowDashboards] =
-    useState(false);
+
   const [showMobileMenu, setShowMobileMenu] =
     useState(false);
 
-  const switchDashboard = (path) => {
+  const [loggingOut, setLoggingOut] =
+    useState(false);
+
+  const handleNavigation = () => {
     setShowProfile(false);
-    setShowDashboards(false);
     setShowMobileMenu(false);
-    navigate(path);
   };
 
   const handleLogout = async () => {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
     setShowProfile(false);
-    setShowDashboards(false);
+    setShowMobileMenu(false);
 
     try {
-      await logout();
+      await signOut();
+    } catch (error) {
+      console.error(
+        "Logout error:",
+        error
+      );
     } finally {
-      navigate("/", { replace: true });
+      navigate("/", {
+        replace: true,
+      });
+
+      setLoggingOut(false);
     }
   };
 
   const displayName =
+    profile?.full_name ||
     user?.user_metadata?.full_name ||
     "Admin";
 
+  const displayEmail =
+    profile?.email ||
+    user?.email ||
+    "Administrator";
+
   return (
     <div className="min-h-screen bg-slate-50">
+
+      {/* =====================================================
+          DESKTOP SIDEBAR
+      ===================================================== */}
+
       <aside className="hidden md:flex w-64 bg-white border-r border-slate-100 flex-col fixed inset-y-0 left-0 z-30">
+
+        {/* LOGO */}
+
         <div className="p-6">
-          <div className="text-xl font-bold text-blue-600">
-            🐾 PawSync
-          </div>
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/admin")
+            }
+            className="text-xl font-bold text-blue-600 flex items-center gap-2"
+          >
+            <span>🐾</span>
+            <span>PawSync</span>
+          </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1">
+        {/* NAVIGATION */}
+
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
           {adminNavItems.map((item) => {
             const Icon = item.icon;
 
@@ -107,11 +146,12 @@ export default function DashboardLayout({
               <NavLink
                 key={item.name}
                 to={item.path}
+                onClick={handleNavigation}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
+                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-blue-50 text-blue-600 font-semibold"
-                      : "text-slate-600 hover:bg-slate-50"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`
                 }
               >
@@ -121,7 +161,12 @@ export default function DashboardLayout({
             );
           })}
         </nav>
+
       </aside>
+
+      {/* =====================================================
+          MOBILE MENU
+      ===================================================== */}
 
       {showMobileMenu && (
         <>
@@ -133,10 +178,20 @@ export default function DashboardLayout({
           />
 
           <aside className="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 shadow-xl md:hidden">
+
             <div className="p-6 flex items-center justify-between border-b border-slate-100">
-              <div className="text-xl font-bold text-blue-600">
-                🐾 PawSync
-              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMobileMenu(false);
+                  navigate("/admin");
+                }}
+                className="text-xl font-bold text-blue-600 flex items-center gap-2"
+              >
+                <span>🐾</span>
+                <span>PawSync</span>
+              </button>
 
               <button
                 type="button"
@@ -147,9 +202,11 @@ export default function DashboardLayout({
               >
                 <X className="w-5 h-5" />
               </button>
+
             </div>
 
             <nav className="p-4 space-y-1">
+
               {adminNavItems.map((item) => {
                 const Icon = item.icon;
 
@@ -157,9 +214,7 @@ export default function DashboardLayout({
                   <NavLink
                     key={item.name}
                     to={item.path}
-                    onClick={() =>
-                      setShowMobileMenu(false)
-                    }
+                    onClick={handleNavigation}
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium ${
                         isActive
@@ -169,17 +224,40 @@ export default function DashboardLayout({
                     }
                   >
                     <Icon className="w-5 h-5" />
-                    {item.name}
+                    <span>{item.name}</span>
                   </NavLink>
                 );
               })}
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 mt-2"
+              >
+                <LogOut className="w-5 h-5" />
+
+                {loggingOut
+                  ? "Logging out..."
+                  : "Logout"}
+              </button>
+
             </nav>
+
           </aside>
         </>
       )}
 
+      {/* =====================================================
+          MAIN CONTENT
+      ===================================================== */}
+
       <div className="md:pl-64 min-h-screen">
+
+        {/* HEADER */}
+
         <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 sm:px-6 md:px-8 sticky top-0 z-30">
+
           <button
             type="button"
             onClick={() =>
@@ -192,22 +270,26 @@ export default function DashboardLayout({
 
           <div />
 
+          {/* TOP-RIGHT PROFILE MENU */}
+
           <div className="relative">
+
             <button
               type="button"
-              onClick={() => {
+              onClick={() =>
                 setShowProfile(
                   (value) => !value
-                );
-                setShowDashboards(false);
-              }}
+                )
+              }
               className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg hover:bg-slate-50"
             >
+
               <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
                 <User className="w-5 h-5 text-blue-600" />
               </div>
 
               <div className="text-left hidden sm:block">
+
                 <p className="text-sm font-semibold text-slate-800">
                   {displayName}
                 </p>
@@ -215,6 +297,7 @@ export default function DashboardLayout({
                 <p className="text-xs text-slate-500">
                   Administrator
                 </p>
+
               </div>
 
               <ChevronDown
@@ -224,28 +307,32 @@ export default function DashboardLayout({
                     : ""
                 }`}
               />
+
             </button>
+
+            {/* HEADER PROFILE DROPDOWN */}
 
             {showProfile && (
               <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-[100]">
+
                 <div className="px-4 py-3 border-b border-slate-100">
+
                   <p className="font-semibold text-slate-800">
                     {displayName}
                   </p>
 
                   <p className="text-xs text-slate-500">
-                    {user?.email ||
-                      "Administrator"}
+                    {displayEmail}
                   </p>
+
                 </div>
 
                 <button
                   type="button"
-                  onClick={() =>
-                    switchDashboard(
-                      "/admin/profile"
-                    )
-                  }
+                  onClick={() => {
+                    setShowProfile(false);
+                    navigate("/admin/profile");
+                  }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
                 >
                   <User className="w-4 h-4" />
@@ -255,20 +342,31 @@ export default function DashboardLayout({
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"
+                  disabled={loggingOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 border-t border-slate-100 disabled:opacity-50"
                 >
                   <LogOut className="w-4 h-4" />
-                  Logout
+
+                  {loggingOut
+                    ? "Logging out..."
+                    : "Logout"}
                 </button>
+
               </div>
             )}
+
           </div>
+
         </header>
+
+        {/* PAGE */}
 
         <main className="p-4 sm:p-6 md:p-8">
           {children}
         </main>
+
       </div>
+
     </div>
   );
 }
