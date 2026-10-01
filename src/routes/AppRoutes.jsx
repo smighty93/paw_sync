@@ -461,27 +461,7 @@ function AppRoutes() {
           }
         />
 
-        {/* =================================================
-            VETERINARIAN - PRESCRIPTIONS
-        ================================================= */}
-
-        <Route
-          path="/veterinarian/prescriptions"
-          element={
-            <RoleRoute
-              allowedRoles={["veterinarian"]}
-            >
-              <ResponsivePage
-                desktop={
-                  <VeterinarianPrescriptions />
-                }
-                mobile={
-                  <PrescriptionsMobile />
-                }
-              />
-            </RoleRoute>
-          }
-        />
+        
 
         {/* =================================================
             VETERINARIAN - TODAY'S APPOINTMENTS
