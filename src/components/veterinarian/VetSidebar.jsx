@@ -25,11 +25,7 @@ const menuItems = [
     label: "Patient Records",
     path: "/veterinarian/patient-records",
   },
-  {
-    icon: Pill,
-    label: "Prescriptions",
-    path: "/veterinarian/prescriptions",
-  },
+  
   {
     icon: FileText,
     label: "Medical Reports",
