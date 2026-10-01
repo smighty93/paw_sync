@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
   User,
   ChevronDown,
-  Stethoscope,
   LogOut,
   Menu,
   X,
@@ -44,10 +42,15 @@ export default function VetDashboardLayout({ children }) {
   const displayName =
     user?.user_metadata?.full_name || "Veterinarian";
 
+  const filteredVetMenu = vetMenu.filter(
+    (item) => item.title !== "Patient Records"
+  );
+
   return (
     <div className="min-h-screen bg-slate-50">
 
       {/* ================= DESKTOP SIDEBAR ================= */}
+
       <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex-col">
 
         {/* Logo */}
@@ -65,7 +68,7 @@ export default function VetDashboardLayout({ children }) {
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
-          {vetMenu.map((item) => {
+          {filteredVetMenu.map((item) => {
             const Icon = item.icon;
 
             return (
@@ -113,6 +116,7 @@ export default function VetDashboardLayout({ children }) {
       </aside>
 
       {/* ================= MOBILE SIDEBAR ================= */}
+
       {showMobileMenu && (
         <>
           <div
@@ -145,7 +149,7 @@ export default function VetDashboardLayout({ children }) {
 
             {/* Mobile Navigation */}
             <nav className="p-4 space-y-1 overflow-y-auto">
-              {vetMenu.map((item) => {
+              {filteredVetMenu.map((item) => {
                 const Icon = item.icon;
 
                 return (
@@ -172,11 +176,12 @@ export default function VetDashboardLayout({ children }) {
       )}
 
       {/* ================= MAIN AREA ================= */}
+
       <div className="md:pl-64 min-h-screen">
 
         {/* ================= TOP HEADER ================= */}
-        <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-30">
 
+        <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-30">
           <div className="h-full px-4 sm:px-6 md:px-8 flex items-center justify-between">
 
             {/* Mobile Menu */}
@@ -235,12 +240,12 @@ export default function VetDashboardLayout({ children }) {
               </button>
 
               {/* ================= PROFILE DROPDOWN ================= */}
+
               {showProfile && (
                 <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-[100]">
 
                   {/* User Info */}
                   <div className="px-4 py-4 border-b border-slate-100">
-
                     <div className="flex items-center gap-3">
 
                       <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center">
@@ -258,9 +263,7 @@ export default function VetDashboardLayout({ children }) {
                       </div>
 
                     </div>
-
                   </div>
-
 
                   {/* Profile */}
                   <button
@@ -286,11 +289,13 @@ export default function VetDashboardLayout({ children }) {
 
                 </div>
               )}
+
             </div>
           </div>
         </header>
 
         {/* ================= PAGE CONTENT ================= */}
+
         <main className="p-4 sm:p-6 md:p-8">
           {children}
         </main>
