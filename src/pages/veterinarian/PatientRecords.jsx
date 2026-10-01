@@ -12,35 +12,96 @@ function PatientRecords() {
   }, []);
 
   async function loadPatients() {
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
+  try {
+    /*
+     * Get ALL pets.
+     *
+     * IMPORTANT:
+     * There is intentionally NO veterinarian_id filter here.
+     */
+    const {
+      data: petsData,
+      error: petsError,
+    } = await supabase
+      .from("pets")
+      .select(`
+        id,
+        owner_id,
+        name,
+        species,
+        breed,
+        gender,
+        date_of_birth,
+        weight
+      `)
+      .order("name", {
+        ascending: true,
+      });
+
+    if (petsError) {
+      throw petsError;
+    }
+
+    const pets = petsData || [];
+
+    if (pets.length === 0) {
+      setPatients([]);
+      return;
+    }
+
+    /*
+     * Get all owner IDs belonging to these pets.
+     */
+    const ownerIds = [
+      ...new Set(
+        pets
+          .map((pet) => pet.owner_id)
+          .filter(Boolean)
+      ),
+    ];
+
+    let profiles = [];
+
+    if (ownerIds.length > 0) {
       const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+        data: profileData,
+        error: profilesError,
+      } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", ownerIds);
 
-      if (userError) {
-        throw userError;
+      if (profilesError) {
+        throw profilesError;
       }
 
-      if (!user) {
-        throw new Error("You are not logged in.");
-      }
+      profiles = profileData || [];
+    }
 
-      /*
-       * Get patients who have appointments with this veterinarian.
-       * The appointments RLS policy already allows veterinarians
-       * to view their related appointments.
-       */
+    /*
+     * Get appointments for ALL pets.
+     *
+     * There is intentionally NO veterinarian_id filter.
+     */
+    const petIds = pets.map(
+      (pet) => pet.id
+    );
+
+    let appointments = [];
+
+    if (petIds.length > 0) {
       const {
         data: appointmentData,
         error: appointmentsError,
       } = await supabase
         .from("appointments")
-        .select("pet_id, appointment_date, status")
-        .eq("veterinarian_id", user.id)
+        .select(
+          "pet_id, appointment_date, status"
+        )
+        .in("pet_id", petIds)
         .order("appointment_date", {
           ascending: false,
         });
@@ -49,120 +110,61 @@ function PatientRecords() {
         throw appointmentsError;
       }
 
-      const appointments = appointmentData || [];
+      appointments = appointmentData || [];
+    }
 
-      /*
-       * Get unique patient IDs.
-       */
-      const petIds = [
-        ...new Set(
-          appointments
-            .map((appointment) => appointment.pet_id)
-            .filter(Boolean)
-        ),
-      ];
-
-      if (petIds.length === 0) {
-        setPatients([]);
-        return;
-      }
-
-      /*
-       * Get pet information.
-       */
-      const {
-        data: petsData,
-        error: petsError,
-      } = await supabase
-        .from("pets")
-        .select(`
-          id,
-          owner_id,
-          name,
-          species,
-          breed,
-          gender,
-          date_of_birth,
-          weight
-        `)
-        .in("id", petIds);
-
-      if (petsError) {
-        throw petsError;
-      }
-
-      const pets = petsData || [];
-
-      /*
-       * Get owners.
-       */
-      const ownerIds = [
-        ...new Set(
-          pets
-            .map((pet) => pet.owner_id)
-            .filter(Boolean)
-        ),
-      ];
-
-      let profiles = [];
-
-      if (ownerIds.length > 0) {
-        const {
-          data: profileData,
-          error: profilesError,
-        } = await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .in("id", ownerIds);
-
-        if (profilesError) {
-          throw profilesError;
-        }
-
-        profiles = profileData || [];
-      }
-
-      /*
-       * Build the patient list.
-       */
-      const formattedPatients = pets.map((pet) => {
+    /*
+     * Build the complete patient list.
+     */
+    const formattedPatients = pets.map(
+      (pet) => {
         const owner = profiles.find(
-          (profile) => profile.id === pet.owner_id
+          (profile) =>
+            profile.id === pet.owner_id
         );
 
-        const petAppointments = appointments.filter(
-          (appointment) => appointment.pet_id === pet.id
-        );
+        const petAppointments =
+          appointments.filter(
+            (appointment) =>
+              appointment.pet_id === pet.id
+          );
 
         const latestAppointment =
           petAppointments[0];
 
         return {
           ...pet,
+
           ownerName:
-            owner?.full_name || "Unknown Owner",
+            owner?.full_name ||
+            "Unknown Owner",
+
           latestAppointmentDate:
-            latestAppointment?.appointment_date || null,
+            latestAppointment?.appointment_date ||
+            null,
+
           latestAppointmentStatus:
-            latestAppointment?.status || null,
+            latestAppointment?.status ||
+            null,
         };
-      });
+      }
+    );
 
-      setPatients(formattedPatients);
-    } catch (err) {
-      console.error(
-        "Error loading patient records:",
-        err
-      );
+    setPatients(formattedPatients);
+  } catch (err) {
+    console.error(
+      "Error loading patient records:",
+      err
+    );
 
-      setError(
-        err.message ||
-          "Failed to load patient records."
-      );
-    } finally {
-      setLoading(false);
-    }
+    setError(
+      err.message ||
+        "Failed to load patient records."
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   function calculateAge(dateOfBirth) {
     if (!dateOfBirth) {
