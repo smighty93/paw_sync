@@ -34,11 +34,7 @@ const vetMenu = [
     path: "/veterinarian/medical-reports",
     icon: FileText,
   },
-  {
-    title: "Prescriptions",
-    path: "/veterinarian/prescriptions",
-    icon: Pill,
-  },
+  
   {
     title: "Vaccinations",
     path: "/veterinarian/vaccinations",
